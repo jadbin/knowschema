@@ -1,0 +1,7 @@
+{
+  "authentication_type": "jwt",
+  "guniflask_version": "0.6.0a1",
+  "jwt_secret": "n-yTGr73WNDde0Riz04WXaP_2aDVfJMa_mYW4iS_6XA",
+  "port": 8062,
+  "project_name": "knowschema"
+}
