@@ -21,6 +21,12 @@ class EntityTypeController:
         result = [e.to_dict() for e in entity_types]
         return jsonify(result)
 
+    @get_route('/entity-types/_all')
+    def get_all_entity_types(self):
+        entity_types = EntityType.query.all()
+        result = [i.to_dict() for i in entity_types]
+        return jsonify(result)
+
     @get_route('/entity-types/<entity_type_id>')
     def get_entity_type(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()

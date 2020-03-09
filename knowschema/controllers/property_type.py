@@ -47,6 +47,20 @@ class PropertyTypeController:
 
         return 'success'
 
+    @put_route('/property-types/_auto_create')
+    def update_property_types_with_auto_create(self):
+        data = request.json
+        for d in data:
+            if 'id' in d:
+                property_type = PropertyType.query.filter_by(id=d['id']).first()
+                property_type.update_by_dict(d, ignore='id,create_at,updated_at')
+            else:
+                property_type = PropertyType.from_dict(data)
+                db.session.add(property_type)
+        db.session.commit()
+
+        return 'success'
+
     @delete_route('/property-types/<property_type_id>')
     def delete_entity_type(self, property_type_id):
         property_type = PropertyType.query.filter_by(id=property_type_id).first()
