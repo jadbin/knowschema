@@ -15,10 +15,11 @@ class EntityTypeController:
     @get_route('/entity-types/<entity_type_id>/children')
     def get_children(self, entity_type_id):
         entity_types = EntityType.query.filter_by(father_id=entity_type_id)
+        result = []
         for entity_type in entity_types:
             d = entity_type.to_dict()
             d['property_types'] = [p.to_dict() for p in entity_type.property_types]
-        result = [e.to_dict() for e in entity_types]
+            result.append(d)
         return jsonify(result)
 
     @get_route('/entity-types/_all')
