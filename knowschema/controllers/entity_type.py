@@ -3,7 +3,7 @@
 from flask import request, abort, jsonify
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
-from knowschema.models import EntityType
+from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping
 from knowschema.app import db
 
 
@@ -69,3 +69,12 @@ class EntityTypeController:
         db.session.commit()
 
         return 'success'
+
+    @get_route('/entity-types/clause/<entity_type_id>')
+    def get_relative_clause(self, entity_type_id):
+        mappings = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type_id).all()
+        items = []
+        for mapping in mappings:
+            item = Clause.query.filter_by(id=mapping.clause_id).first().to_dict()
+            items.append(item)
+        return jsonify(items)
