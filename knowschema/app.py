@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 
 db = SQLAlchemy()
 
-
 def make_settings(app, settings):
     """
     This function is invoked before initializing app.
@@ -20,3 +19,6 @@ def init_app(app, settings):
     This function is invoked before running app.
     """
     db.init_app(app)
+
+    # from knowschema.load_clause import load_clause
+    # load_clause(app)
