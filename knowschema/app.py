@@ -20,5 +20,5 @@ def init_app(app, settings):
     """
     db.init_app(app)
 
-    # from knowschema.load_clause import load_clause
-    # load_clause(app)
+    from knowschema.load_clause import load_clause
+    load_clause(app)
