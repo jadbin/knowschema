@@ -18,4 +18,3 @@ class EntityType(db.Model):
     created_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP"), default=db.func.now())
     updated_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"), default=db.func.now(), onupdate=db.func.now())
     property_types = db.relationship('PropertyType', backref=db.backref('entity_type', lazy='joined'), cascade='all, delete-orphan', lazy='select')
-    clause_entity_type_mappings = db.relationship('ClauseEntityTypeMapping', backref=db.backref('entity_type', lazy='joined'), cascade='all, delete-orphan', lazy='select')

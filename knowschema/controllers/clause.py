@@ -4,6 +4,7 @@ from guniflask.web import blueprint, get_route, post_route, put_route, delete_ro
 from knowschema.models import Field, Clause, ClauseEntityTypeMapping, EntityType
 from knowschema.app import db
 
+
 @blueprint('/api')
 class ClauseController:
     def __init__(self):
@@ -34,36 +35,16 @@ class ClauseController:
     @post_route("/clause/create-mapping")
     def create_entity_type_clause_mapping(self):
         data = request.json
-        item = dict()
-
-        if (data.get('entity_type_id')):
-            item['entity_type_id'] = data['entity_type_id']
-            entity_type = EntityType.query.filter_by(id=data['entity_type_id']).first()
-        elif (data.get('entity_type_uri')):
-            entity_type = EntityType.query.filter_by(uri=data['entity_type_uri']).first()
-            item['entity_type_id'] = entity_type.id
-        else:
-            abort(404)
-
-        if (data.get('clause_id')):
-            item['clause_id'] = data['clause_id']
-            clause = Clause.query.filter_by(id=data['clause_id']).first()
-        elif (data.get('clause_uri')):
-            clause = Clause.query.filter_by(uri=data['clause_uri']).first()
-            item['clause_id'] = clause.id
-        else:
-            abort(404)
-
-        mapping = ClauseEntityTypeMapping.from_dict(item, ignore='id')
+        mapping = ClauseEntityTypeMapping.from_dict(data, ignore='id')
         db.session.add(mapping)
         db.session.commit()
 
-        result = {"mapping": mapping.to_dict(), "entity_type": entity_type.to_dict(), "clause": clause.to_dict()}
-        return jsonify(result)
+        return jsonify(mapping.to_dict())
 
     @delete_route('/clause/delete-mapping/<entity_type_id>/<clause_id>')
     def delete_entity_type(self, entity_type_id, clause_id):
-        mapping_item = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type_id, clause_id=clause_id).first()
+        mapping_item = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type_id,
+                                                               clause_id=clause_id).first()
         if mapping_item is None:
             abort(404)
 

@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from flask import request, abort, jsonify
+from sqlalchemy import or_, and_
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
 from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping
@@ -18,7 +19,21 @@ class EntityTypeController:
         result = []
         for entity_type in entity_types:
             d = entity_type.to_dict()
-            d['property_types'] = [p.to_dict() for p in entity_type.property_types]
+            property_types = []
+            for p in entity_type.property_types:
+                data = p.to_dict()
+                clauses = []
+                if p.is_entity:
+                    obj = EntityType.query.filter_by(uri=p.field_type).first()
+                    mappings = ClauseEntityTypeMapping.query.filter(
+                        and_(ClauseEntityTypeMapping.object_id == entity_type.id,
+                             ClauseEntityTypeMapping.concept_id == obj.id)).all()
+                    for m in mappings:
+                        clauses.append(m.clause.to_dict())
+                data['clauses'] = clauses
+                property_types.append(data)
+
+            d['property_types'] = property_types
             result.append(d)
         return jsonify(result)
 
@@ -40,11 +55,12 @@ class EntityTypeController:
             data = p.to_dict()
             clauses = []
             if p.is_entity:
-                entity_type_id = p.entity_type_id
-                if entity_type_id:
-                    mappings = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type_id).all()
-                    for m in mappings:
-                        clauses.append(m.clause.to_dict())
+                obj = EntityType.query.filter_by(uri=p.field_type).first()
+                mappings = ClauseEntityTypeMapping.query.filter(
+                    and_(ClauseEntityTypeMapping.object_id == entity_type.id,
+                         ClauseEntityTypeMapping.concept_id == obj.id)).all()
+                for m in mappings:
+                    clauses.append(m.clause.to_dict())
             data['clauses'] = clauses
             property_types.append(data)
 
@@ -85,11 +101,16 @@ class EntityTypeController:
 
     @get_route('/entity-types/clause/<entity_type_id>')
     def get_relative_clause(self, entity_type_id):
-        mappings = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type_id).all()
+        mappings = ClauseEntityTypeMapping.query.filter(
+            or_(ClauseEntityTypeMapping.concept_id == entity_type_id,
+                ClauseEntityTypeMapping.object_id == entity_type_id)).all()
         items = []
+        item_id = set()
         for mapping in mappings:
             item = Clause.query.filter_by(id=mapping.clause_id).first().to_dict()
-            items.append(item)
+            if item['id'] not in item_id:
+                items.append(item)
+                item_id.add(item['id'])
         return jsonify(items)
 
     @get_route('/entity-types/clause/uri/<entity_type_uri>')
