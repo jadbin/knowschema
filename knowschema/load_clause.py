@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 clause_dir = "knowschema/clauses/"
 
+
 def load_clause(app):
     docs = os.listdir(clause_dir)
     loaded_file = json.load(open(clause_dir + "index.json", "r"))

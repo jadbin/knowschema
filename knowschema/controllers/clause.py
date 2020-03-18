@@ -71,3 +71,12 @@ class ClauseController:
         db.session.commit()
 
         return 'success'
+
+    @post_route('/clauses')
+    def create_clause(self):
+        data = request.json
+        clause = Clause.from_dict(data, ignore='id')
+        db.session.add(clause)
+        db.session.commit()
+
+        return jsonify(clause.to_dict())

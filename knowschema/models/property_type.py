@@ -13,7 +13,7 @@ class PropertyType(db.Model):
     display_name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255))
     icon = db.Column(db.String(255))
-    field_type = db.Column('fieldType', db.String(255))
+    field_type = db.Column(db.String(255))
     is_entity = db.Column(db.SmallInteger, index=True, server_default=_text("'0'"))
     entity_type_id = db.Column(db.Integer, db.ForeignKey('entity_type.id'), nullable=False, index=True)
     created_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP"), default=db.func.now())
