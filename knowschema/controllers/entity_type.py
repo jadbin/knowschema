@@ -35,7 +35,20 @@ class EntityTypeController:
             abort(404)
 
         d = entity_type.to_dict()
-        d['property_types'] = [p.to_dict() for p in entity_type.property_types]
+        property_types = []
+        for p in entity_type.property_types:
+            data = p.to_dict()
+            clauses = []
+            if p.is_entity:
+                entity_type_id = p.entity_type_id
+                if entity_type_id:
+                    mappings = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type_id).all()
+                    for m in mappings:
+                        clauses.append(m.clause.to_dict())
+            data['clauses'] = clauses
+            property_types.append(data)
+
+        d['property_types'] = property_types
         return jsonify(d)
 
     @post_route('/entity-types')
