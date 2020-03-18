@@ -27,11 +27,6 @@ class PropertyTypeController:
         property_type = PropertyType.from_dict(data, ignore='id')
         db.session.add(property_type)
 
-        entity_type_id = property_type.entity_type_id
-        entity_type = EntityType.query.filter_by(id=entity_type_id).first()
-        if len(entity_type.property_types) > 0:
-            entity_type.has_child = True
-
         db.session.commit()
         return jsonify(property_type.to_dict())
 
@@ -68,11 +63,6 @@ class PropertyTypeController:
             abort(404)
 
         db.session.delete(property_type)
-
-        entity_type_id = property_type.entity_type_id
-        entity_type = EntityType.query.filter_by(id=entity_type_id).first()
-        if len(entity_type.property_types) == 0:
-            entity_type.has_child = False
 
         db.session.commit()
 
