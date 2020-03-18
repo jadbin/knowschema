@@ -78,3 +78,16 @@ class EntityTypeController:
             item = Clause.query.filter_by(id=mapping.clause_id).first().to_dict()
             items.append(item)
         return jsonify(items)
+
+    @get_route('/entity-types/clause/uri/<entity_type_uri>')
+    def get_entity_type_by_uri(self, entity_type_uri):
+        entity_type = EntityType.query.filter_by(uri=entity_type_uri).first()
+        if entity_type is None:
+            abort(404)
+
+        mappings = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type.id).all()
+        items = []
+        for mapping in mappings:
+            item = Clause.query.filter_by(id=mapping.clause_id).first().to_dict()
+            items.append(item)
+        return jsonify(items)
