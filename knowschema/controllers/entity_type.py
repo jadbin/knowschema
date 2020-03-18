@@ -1,11 +1,15 @@
 # coding=utf-8
 
+import logging
+
 from flask import request, abort, jsonify
 from sqlalchemy import or_, and_
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
 from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping
 from knowschema.app import db
+
+log = logging.getLogger(__name__)
 
 
 @blueprint('/api')
@@ -67,6 +71,16 @@ class EntityTypeController:
         d['property_types'] = property_types
         return jsonify(d)
 
+    @get_route('/entity-types/_uri')
+    def get_entity_type_by_uri(self):
+        entity_type_uri = request.args.get('uri')
+        if entity_type_uri is None:
+            abort(400)
+        entity_type = EntityType.query.filter_by(uri=entity_type_uri).first()
+        if entity_type is None:
+            abort(404)
+        return jsonify(entity_type.to_dict())
+
     @post_route('/entity-types')
     def create_entity_type(self):
         data = request.json
@@ -114,7 +128,7 @@ class EntityTypeController:
         return jsonify(items)
 
     @get_route('/entity-types/clause/uri/<entity_type_uri>')
-    def get_entity_type_by_uri(self, entity_type_uri):
+    def get_entity_type_with_clause_by_uri(self, entity_type_uri):
         entity_type = EntityType.query.filter_by(uri=entity_type_uri).first()
         if entity_type is None:
             abort(404)
