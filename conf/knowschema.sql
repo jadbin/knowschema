@@ -11,7 +11,7 @@
  Target Server Version : 50721
  File Encoding         : utf-8
 
- Date: 03/18/2020 13:30:02 PM
+ Date: 03/18/2020 15:37:36 PM
 */
 
 SET NAMES utf8mb4;
@@ -31,7 +31,7 @@ CREATE TABLE `clause` (
   UNIQUE KEY `uri` (`uri`),
   KEY `clause_field` (`field_id`) USING BTREE,
   CONSTRAINT `clause_field` FOREIGN KEY (`field_id`) REFERENCES `field` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=496 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=934 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 --  Table structure for `clause_entity_type_mapping`
@@ -39,14 +39,15 @@ CREATE TABLE `clause` (
 DROP TABLE IF EXISTS `clause_entity_type_mapping`;
 CREATE TABLE `clause_entity_type_mapping` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `entity_type_id` int(11) NOT NULL,
+  `concept_id` int(11) NOT NULL,
+  `object_id` int(11) NOT NULL,
   `clause_id` int(11) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  KEY `entity_type` (`entity_type_id`) USING BTREE,
   KEY `clause` (`clause_id`) USING BTREE,
-  CONSTRAINT `clause` FOREIGN KEY (`clause_id`) REFERENCES `clause` (`id`),
-  CONSTRAINT `entity_type` FOREIGN KEY (`entity_type_id`) REFERENCES `entity_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=487 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+  KEY `object` (`object_id`),
+  KEY `concept` (`concept_id`) USING BTREE,
+  CONSTRAINT `clause` FOREIGN KEY (`clause_id`) REFERENCES `clause` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1358 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 --  Table structure for `entity_type`
@@ -66,7 +67,7 @@ CREATE TABLE `entity_type` (
   KEY `uri` (`uri`) USING BTREE,
   KEY `father_id` (`father_id`) USING BTREE,
   KEY `has_child` (`has_child`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2012 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=3983 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 --  Table structure for `field`
@@ -99,6 +100,6 @@ CREATE TABLE `property_type` (
   KEY `entity_type_id` (`entity_type_id`) USING BTREE,
   KEY `is_entity` (`is_entity`) USING BTREE,
   CONSTRAINT `property_type_ibfk_1` FOREIGN KEY (`entity_type_id`) REFERENCES `entity_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=267 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
+) ENGINE=InnoDB AUTO_INCREMENT=905 DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;
