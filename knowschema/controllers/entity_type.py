@@ -29,11 +29,12 @@ class EntityTypeController:
                 clauses = []
                 if p.is_entity:
                     obj = EntityType.query.filter_by(uri=p.field_type).first()
-                    mappings = ClauseEntityTypeMapping.query.filter(
-                        and_(ClauseEntityTypeMapping.object_id == entity_type.id,
-                             ClauseEntityTypeMapping.concept_id == obj.id)).all()
-                    for m in mappings:
-                        clauses.append(m.clause.to_dict())
+                    if obj is not None:
+                        mappings = ClauseEntityTypeMapping.query.filter(
+                            and_(ClauseEntityTypeMapping.object_id == entity_type.id,
+                                 ClauseEntityTypeMapping.concept_id == obj.id)).all()
+                        for m in mappings:
+                            clauses.append(m.clause.to_dict())
                 data['clauses'] = clauses
                 property_types.append(data)
 
@@ -60,11 +61,12 @@ class EntityTypeController:
             clauses = []
             if p.is_entity:
                 obj = EntityType.query.filter_by(uri=p.field_type).first()
-                mappings = ClauseEntityTypeMapping.query.filter(
-                    and_(ClauseEntityTypeMapping.object_id == entity_type.id,
-                         ClauseEntityTypeMapping.concept_id == obj.id)).all()
-                for m in mappings:
-                    clauses.append(m.clause.to_dict())
+                if obj is not None:
+                    mappings = ClauseEntityTypeMapping.query.filter(
+                        and_(ClauseEntityTypeMapping.object_id == entity_type.id,
+                             ClauseEntityTypeMapping.concept_id == obj.id)).all()
+                    for m in mappings:
+                        clauses.append(m.clause.to_dict())
             data['clauses'] = clauses
             property_types.append(data)
 
