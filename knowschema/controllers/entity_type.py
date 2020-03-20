@@ -8,14 +8,15 @@ from guniflask.web import blueprint, get_route, post_route, put_route, delete_ro
 
 from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping
 from knowschema.app import db
+from knowschema.services.entity_type import EntityTypeService
 
 log = logging.getLogger(__name__)
 
 
 @blueprint('/api')
 class EntityTypeController:
-    def __init__(self):
-        pass
+    def __init__(self, entity_type_service: EntityTypeService):
+        self.entity_type_service = entity_type_service
 
     @get_route('/entity-types/<entity_type_id>/children')
     def get_children(self, entity_type_id):
@@ -23,22 +24,6 @@ class EntityTypeController:
         result = []
         for entity_type in entity_types:
             d = entity_type.to_dict()
-            property_types = []
-            for p in entity_type.property_types:
-                data = p.to_dict()
-                clauses = []
-                if p.is_entity:
-                    obj = EntityType.query.filter_by(uri=p.field_type).first()
-                    if obj is not None:
-                        mappings = ClauseEntityTypeMapping.query.filter(
-                            and_(ClauseEntityTypeMapping.object_id == entity_type.id,
-                                 ClauseEntityTypeMapping.concept_id == obj.id)).all()
-                        for m in mappings:
-                            clauses.append(m.clause.to_dict())
-                data['clauses'] = clauses
-                property_types.append(data)
-
-            d['property_types'] = property_types
             result.append(d)
         return jsonify(result)
 
@@ -71,6 +56,7 @@ class EntityTypeController:
             property_types.append(data)
 
         d['property_types'] = property_types
+        d['parent_property_types'] = self.entity_type_service.get_inherited_properties(entity_type)
         return jsonify(d)
 
     @get_route('/entity-types/_uri')
