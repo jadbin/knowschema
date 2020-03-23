@@ -9,14 +9,16 @@ from guniflask.web import blueprint, get_route, post_route, put_route, delete_ro
 from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping
 from knowschema.app import db
 from knowschema.services.entity_type import EntityTypeService
+from knowschema.services.operation_record import OperationRecordService
 
 log = logging.getLogger(__name__)
 
 
 @blueprint('/api')
 class EntityTypeController:
-    def __init__(self, entity_type_service: EntityTypeService):
+    def __init__(self, entity_type_service: EntityTypeService, operation_record_service: OperationRecordService):
         self.entity_type_service = entity_type_service
+        self.operation_record_service = operation_record_service
 
     @get_route('/entity-types/<entity_type_id>/children')
     def get_children(self, entity_type_id):
@@ -76,6 +78,9 @@ class EntityTypeController:
         db.session.add(entity_type)
         db.session.commit()
 
+        operator = "admin"
+        self.operation_record_service.create_entity_type_record(operator, entity_type)
+
         return jsonify(entity_type.to_dict())
 
     @put_route('/entity-types/<entity_type_id>')
@@ -85,6 +90,10 @@ class EntityTypeController:
             abort(404)
 
         data = request.json
+
+        operator = "admin"
+        self.operation_record_service.update_entity_type_record(operator, data, entity_type)
+
         entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
         db.session.commit()
 
@@ -95,6 +104,9 @@ class EntityTypeController:
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
         if entity_type is None:
             abort(404)
+
+        operator = "admin"
+        self.operation_record_service.delete_entity_type_record(operator, entity_type)
 
         db.session.delete(entity_type)
         db.session.commit()
