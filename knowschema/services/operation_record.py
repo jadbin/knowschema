@@ -101,7 +101,7 @@ class OperationRecordService:
         if operation_type == "UPDATE":
             for key, value in original_prop.items():
                 if key in trace_index:
-                    if value != new_prop[key]:
+                    if value != new_prop.get(key):
                         data['operated_field'] = key
                         data['original_value'] = value
                         data['new_value'] = new_prop[key]
