@@ -42,23 +42,28 @@ class EntityTypeController:
             abort(404)
 
         d = entity_type.to_dict()
-        property_types = []
-        for p in entity_type.property_types:
-            data = p.to_dict()
-            clauses = []
-            if p.is_entity:
-                obj = EntityType.query.filter_by(uri=p.field_type).first()
-                if obj is not None:
-                    mappings = ClauseEntityTypeMapping.query.filter(
-                        and_(ClauseEntityTypeMapping.object_id == entity_type.id,
-                             ClauseEntityTypeMapping.concept_id == obj.id)).all()
-                    for m in mappings:
-                        clauses.append(m.clause.to_dict())
-            data['clauses'] = clauses
-            property_types.append(data)
+        # property_types = []
+        # for p in entity_type.property_types:
+        #     data = p.to_dict()
+        #     clauses = []
+        #     if p.is_entity:
+        #         obj = EntityType.query.filter_by(uri=p.field_type).first()
+        #         if obj is not None:
+        #             mappings = ClauseEntityTypeMapping.query.filter(
+        #                 and_(ClauseEntityTypeMapping.object_id == entity_type.id,
+        #                      ClauseEntityTypeMapping.concept_id == obj.id)).all()
+        #             for m in mappings:
+        #                 clauses.append(m.clause.to_dict())
+        #     data['clauses'] = clauses
+        #     property_types.append(data)
+        # d['property_types'] = property_types
 
-        d['property_types'] = property_types
+        d['property_types'] = [i.to_dict() for i in entity_type.property_types]
         d['parent_property_types'] = self.entity_type_service.get_inherited_properties(entity_type)
+
+        mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id)
+        d['clauses'] = [i.to_dict() for i in mappings]
+
         return jsonify(d)
 
     @get_route('/entity-types/_uri')

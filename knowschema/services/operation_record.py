@@ -4,7 +4,7 @@ import json
 from guniflask.context import service
 
 from knowschema.app import db
-from knowschema.models import OperationRecord, EntityType
+from knowschema.models import OperationRecord, EntityType, ClauseEntityTypeMapping, ClauseRecord
 
 @service
 class OperationRecordService:
@@ -138,3 +138,89 @@ class OperationRecordService:
 
     def delete_entity_type_record(self, operator, entity_type):
         self.entity_type_record(operator, "DELETE", entity_type.id, None, entity_type.to_dict())
+
+    def clause_mapping_record(self,
+            operator,
+            operation_type,
+            clause_mapping_id,
+            new_value,
+            original_value):
+
+        trace_index = [
+            'clause_id',
+            'clause_uri',
+            'object_id',
+            'object_uri',
+            'object_name',
+            'concept_id',
+            'concept_uri',
+            'concept_name',
+            'condition',
+            'description'
+        ]
+
+        data = {
+            'operator': operator,
+            'operation_type': operation_type,
+            'clause_mapping_id': clause_mapping_id,
+            'operated_field': None,
+            'original_value': None,
+            'new_value': None
+        }
+
+        if operation_type == "UPDATE":
+            data['object_id'] = original_value['object_id']
+            data['object_uri'] = original_value['object_uri']
+            data['concept_id'] = original_value['concept_id']
+            data['concept_uri'] = original_value['concept_uri']
+
+            for key, value in original_value.items():
+                if key in trace_index:
+                    if value != new_value.get(key):
+                        data['operated_field'] = key
+                        data['original_value'] = value
+                        data['new_value'] = new_value[key]
+
+                        new_record = ClauseRecord.from_dict(data, ignore='id')
+                        db.session.add(new_record)
+            db.session.commit()
+        elif operation_type == "CREATE":
+            data['object_id'] = new_value['object_id']
+            data['object_uri'] = new_value['object_uri']
+            data['concept_id'] = new_value['concept_id']
+            data['concept_uri'] = new_value['concept_uri']
+
+            for key, value in new_value.items():
+                if key in trace_index:
+                    data['operated_field'] = key
+                    data['new_value'] = value
+
+                    new_record = ClauseRecord.from_dict(data, ignore='id')
+                    db.session.add(new_record)
+            db.session.commit()
+        elif operation_type == "DELETE":
+            del original_value['created_at']
+            del original_value['updated_at']
+
+            data['object_id'] = original_value['object_id']
+            data['object_uri'] = original_value['object_uri']
+            data['concept_id'] = original_value['concept_id']
+            data['concept_uri'] = original_value['concept_uri']
+
+            store_value = json.dumps(original_value)
+            data['original_value'] = store_value
+
+            new_record = ClauseRecord.from_dict(data, ignore='id')
+            db.session.add(new_record)
+            db.session.commit()
+        else:
+            pass
+
+    def create_clause_mapping_record(self, operator, new_clause_mapping):
+        self.clause_mapping_record(operator, "CREATE", new_clause_mapping.id, new_clause_mapping.to_dict(), None)
+
+    def update_clause_mapping_record(self, operator, new_clause_mapping: dict, original_clause_mapping: object):
+        self.clause_mapping_record(operator, "UPDATE", original_clause_mapping.id, new_clause_mapping, original_clause_mapping.to_dict())
+
+    def delete_clause_mapping_record(self, operator, clause_mapping):
+        self.clause_mapping_record(operator, "DELETE", clause_mapping.id, None, clause_mapping.to_dict())

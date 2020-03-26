@@ -11,4 +11,6 @@ class Clause(db.Model):
     content = db.Column(db.String(255))
     level = db.Column(db.Integer)
     field_id = db.Column(db.Integer, db.ForeignKey('field.id'), index=True)
+    time_limit = db.Column(db.String(255))
+    insider = db.Column(db.String(255))
     clause_entity_type_mappings = db.relationship('ClauseEntityTypeMapping', backref=db.backref('clause', lazy='joined'), cascade='all, delete-orphan', lazy='select')
