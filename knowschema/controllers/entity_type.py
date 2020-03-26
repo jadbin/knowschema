@@ -79,12 +79,24 @@ class EntityTypeController:
     @post_route('/entity-types')
     def create_entity_type(self):
         data = request.json
+        print(data)
+
         entity_type = EntityType.from_dict(data, ignore='id')
         db.session.add(entity_type)
         db.session.commit()
 
         operator = "admin"
         self.operation_record_service.create_entity_type_record(operator, entity_type)
+
+        if data['father_id'] != 0:
+            parent = EntityType.query.filter_by(id=data['father_id']).first()
+            if parent:
+                parent_data = parent.to_dict()
+                parent_data['has_child'] += 1
+                parent.update_by_dict(parent_data, ignore='id,create_at,updated_at')
+                db.session.commit()
+            else:
+                print(data['father_id'])
 
         return jsonify(entity_type.to_dict())
 
@@ -98,6 +110,29 @@ class EntityTypeController:
 
         operator = "admin"
         self.operation_record_service.update_entity_type_record(operator, data, entity_type)
+
+        print(data, entity_type.to_dict())
+        print(data['father_id'], entity_type.father_id)
+        if data['father_id'] != entity_type.father_id:
+            if entity_type.father_id != 0:
+                original_parent = EntityType.query.filter_by(id=entity_type.father_id).first()
+                original_parent_data = original_parent.to_dict()
+                original_parent_data['has_child'] -= 1
+                original_parent.update_by_dict(original_parent_data, ignore='id,create_at,updated_at')
+
+                if data['father_id'] != 0:
+                    new_parent = EntityType.query.filter_by(id=data['father_id']).first()
+                    new_parent_data = new_parent.to_dict()
+                    new_parent_data['has_child'] += 1
+                    new_parent.update_by_dict(new_parent_data, ignore='id,create_at,updated_at')
+
+                db.session.commit()
+            else:
+                new_parent = EntityType.query.filter_by(id=data['father_id']).first()
+                new_parent_data = new_parent.to_dict()
+                new_parent_data['has_child'] += 1
+                new_parent.update_by_dict(new_parent_data, ignore='id,create_at,updated_at')
+                db.session.commit()
 
         entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
         db.session.commit()
@@ -115,6 +150,16 @@ class EntityTypeController:
 
         db.session.delete(entity_type)
         db.session.commit()
+
+        if entity_type.father_id != 0:
+            parent = EntityType.query.filter_by(id=entity_type.father_id).first()
+            if parent:
+                parent_data = parent.to_dict()
+                parent_data['has_child'] -= 1
+                parent.update_by_dict(parent_data, ignore='id,create_at,updated_at')
+                db.session.commit()
+            else:
+                print(entity_type.father_id)
 
         return 'success'
 
@@ -144,3 +189,27 @@ class EntityTypeController:
             item = Clause.query.filter_by(id=mapping.clause_id).first().to_dict()
             items.append(item)
         return jsonify(items)
+
+    @get_route('entity-types/_checkout')
+    def checkout(self):
+        entity_types = EntityType.query.all()
+
+        for entity_type in entity_types:
+            data = entity_type.to_dict()
+            data['has_child'] = 0
+
+            entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+        db.session.commit()
+
+        for entity_type in entity_types:
+            if entity_type.father_id != 0:
+                parent = EntityType.query.filter_by(id=entity_type.father_id).first()
+                if parent:
+                    data = parent.to_dict()
+                    data['has_child'] += 1
+                    parent.update_by_dict(data, ignore='id,create_at,updated_at')
+                else:
+                    print(entity_type.father_id)
+        db.session.commit()
+
+        return "success"
