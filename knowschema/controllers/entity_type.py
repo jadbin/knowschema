@@ -4,6 +4,7 @@ import logging
 
 from flask import request, abort, jsonify
 from sqlalchemy import or_, and_
+from sqlalchemy import exc
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
 from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping
@@ -79,11 +80,19 @@ class EntityTypeController:
     @post_route('/entity-types')
     def create_entity_type(self):
         data = request.json
-        print(data)
 
         entity_type = EntityType.from_dict(data, ignore='id')
-        db.session.add(entity_type)
-        db.session.commit()
+
+        try:
+            db.session.add(entity_type)
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            abort(500, "重复URI")
+        except BaseException as e:
+            db.session.rollback()
+            log.error(e)
+            abort(500)
 
         operator = "admin"
         self.operation_record_service.create_entity_type_record(operator, entity_type)
@@ -134,8 +143,16 @@ class EntityTypeController:
                 new_parent.update_by_dict(new_parent_data, ignore='id,create_at,updated_at')
                 db.session.commit()
 
-        entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
-        db.session.commit()
+        try:
+            entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            abort(500, "重复URI")
+        except BaseException as e:
+            db.session.rollback()
+            log.error(e)
+            abort(500)
 
         return 'success'
 
