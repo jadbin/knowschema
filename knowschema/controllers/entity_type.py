@@ -88,7 +88,7 @@ class EntityTypeController:
             db.session.commit()
         except exc.IntegrityError:
             db.session.rollback()
-            abort(400, "重复URI")
+            return "重复URI", 400
         except BaseException as e:
             db.session.rollback()
             log.error(e)
@@ -148,7 +148,7 @@ class EntityTypeController:
             db.session.commit()
         except exc.IntegrityError:
             db.session.rollback()
-            abort(400, "重复URI")
+            return "重复URI", 400
         except BaseException as e:
             db.session.rollback()
             log.error(e)
