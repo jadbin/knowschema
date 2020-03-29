@@ -88,11 +88,11 @@ class EntityTypeController:
             db.session.commit()
         except exc.IntegrityError:
             db.session.rollback()
-            abort(500, "重复URI")
+            abort(400, "重复URI")
         except BaseException as e:
             db.session.rollback()
             log.error(e)
-            abort(500)
+            abort(400)
 
         operator = "admin"
         self.operation_record_service.create_entity_type_record(operator, entity_type)
@@ -148,11 +148,11 @@ class EntityTypeController:
             db.session.commit()
         except exc.IntegrityError:
             db.session.rollback()
-            abort(500, "重复URI")
+            abort(400, "重复URI")
         except BaseException as e:
             db.session.rollback()
             log.error(e)
-            abort(500)
+            abort(400)
 
         return 'success'
 
