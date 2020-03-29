@@ -226,7 +226,7 @@ class EntityTypeController:
                     data['has_child'] += 1
                     parent.update_by_dict(data, ignore='id,create_at,updated_at')
                 else:
-                    print(entity_type.father_id)
+                    log.warning(f"Entity Type : {entity_type.id} and its father : {entity_type.father_id}")
         db.session.commit()
 
         return "success"
