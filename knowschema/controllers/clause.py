@@ -28,17 +28,26 @@ class ClauseController:
 
         return clauses
 
-        # result = []
-        # for item in items:
-        #     d = item.to_dict()
-        #     d['entity_types'] = []
-        #     entity_type_list = [p.to_dict() for p in item.clause_entity_type_mappings]
-        #     for i in entity_type_list:
-        #         entity_type_id = i['entity_type_id']
-        #         entity_type = EntityType.query.filter_by(id=entity_type_id).first().to_dict()
-        #         d['entity_types'].append(entity_type)
-        #     result.append(d)
-        # return jsonify(result)
+    @get_route("/clause/all-clauses")
+    def get_all_clause(self):
+        clauses = Clause.query.all()
+        results = [i.to_dict() for i in clauses]
+        return jsonify(results)
+
+    # @post_route('/clauses')
+    # def create_clause(self):
+    #     data = request.json
+    #     clause = Clause.from_dict(data, ignore='id')
+    #     db.session.add(clause)
+    #     db.session.commit()
+    #
+    #     return jsonify(clause.to_dict())
+
+    @get_route('/clause/all-mappings')
+    def get_all_mappings(self):
+        mappings = ClauseEntityTypeMapping.query.all()
+        result = [i.to_dict() for i in mappings]
+        return jsonify(result)
 
     @post_route("/clause/mapping")
     def create_clause_entity_type_mapping(self):
@@ -83,15 +92,6 @@ class ClauseController:
 
         return 'success'
 
-    # @post_route('/clauses')
-    # def create_clause(self):
-    #     data = request.json
-    #     clause = Clause.from_dict(data, ignore='id')
-    #     db.session.add(clause)
-    #     db.session.commit()
-    #
-    #     return jsonify(clause.to_dict())
-
     @get_route('/clause/_checkout')
     def checkout(self):
         mappings = ClauseEntityTypeMapping.query.all()
@@ -112,9 +112,3 @@ class ClauseController:
         db.session.commit()
 
         return "success"
-
-    @get_route('/clause/all-mappings')
-    def get_all_mappings(self):
-        mappings = ClauseEntityTypeMapping.query.all()
-        result = [i.to_dict() for i in mappings]
-        return jsonify(result)
