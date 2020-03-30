@@ -7,7 +7,7 @@ from sqlalchemy import or_, and_
 from sqlalchemy import exc
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
-from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping
+from knowschema.models import EntityType, Clause, ClauseEntityTypeMapping, PropertyType
 from knowschema.app import db
 from knowschema.services.entity_type import EntityTypeService
 from knowschema.services.operation_record import OperationRecordService
@@ -43,21 +43,6 @@ class EntityTypeController:
             abort(404)
 
         d = entity_type.to_dict()
-        # property_types = []
-        # for p in entity_type.property_types:
-        #     data = p.to_dict()
-        #     clauses = []
-        #     if p.is_entity:
-        #         obj = EntityType.query.filter_by(uri=p.field_type).first()
-        #         if obj is not None:
-        #             mappings = ClauseEntityTypeMapping.query.filter(
-        #                 and_(ClauseEntityTypeMapping.object_id == entity_type.id,
-        #                      ClauseEntityTypeMapping.concept_id == obj.id)).all()
-        #             for m in mappings:
-        #                 clauses.append(m.clause.to_dict())
-        #     data['clauses'] = clauses
-        #     property_types.append(data)
-        # d['property_types'] = property_types
 
         d['property_types'] = [i.to_dict() for i in entity_type.property_types]
         d['parent_property_types'] = self.entity_type_service.get_inherited_properties(entity_type)
@@ -76,6 +61,13 @@ class EntityTypeController:
         if entity_type is None:
             abort(404)
         return jsonify(entity_type.to_dict())
+
+    @get_route("/entity-types/like-query")
+    def get_entity_type_by_like_query(self):
+        query_str = request.args.get('query_str')
+        entity_types = EntityType.query.filter(EntityType.display_name.like("%" + query_str + "%"))
+        results = [i.to_dict() for i in entity_types]
+        return jsonify(results)
 
     @post_route('/entity-types')
     def create_entity_type(self):
@@ -120,8 +112,6 @@ class EntityTypeController:
         operator = "admin"
         self.operation_record_service.update_entity_type_record(operator, data, entity_type)
 
-        print(data, entity_type.to_dict())
-        print(data['father_id'], entity_type.father_id)
         if data['father_id'] != entity_type.father_id:
             if entity_type.father_id != 0:
                 original_parent = EntityType.query.filter_by(id=entity_type.father_id).first()
@@ -141,6 +131,16 @@ class EntityTypeController:
                 new_parent_data = new_parent.to_dict()
                 new_parent_data['has_child'] += 1
                 new_parent.update_by_dict(new_parent_data, ignore='id,create_at,updated_at')
+                db.session.commit()
+
+        if data['display_name'] != entity_type.display_name:
+            property_types = PropertyType.query.filter_by(field_type=entity_type.display_name).all()
+            for property_type in property_types:
+                prop_data = property_type.to_dict()
+                prop_data['field_type'] = data['display_name']
+
+                self.operation_record_service.update_property_type_record(operator, prop_data, property_type)
+                property_type.update_by_dict(prop_data, ignore='id,create_at,updated_at')
                 db.session.commit()
 
         try:
@@ -207,8 +207,8 @@ class EntityTypeController:
             items.append(item)
         return jsonify(items)
 
-    @get_route('entity-types/_checkout')
-    def checkout(self):
+    @get_route('entity-types/_checkout_child')
+    def checkout_child(self):
         entity_types = EntityType.query.all()
 
         for entity_type in entity_types:
@@ -227,6 +227,34 @@ class EntityTypeController:
                     parent.update_by_dict(data, ignore='id,create_at,updated_at')
                 else:
                     log.warning(f"Entity Type : {entity_type.id} and its father : {entity_type.father_id}")
+        db.session.commit()
+
+        return "success"
+
+    @get_route('entity-types/_checkout_uri')
+    def checkout_uri(self):
+        entity_types = EntityType.query.all()
+
+        for entity_type in entity_types:
+            if entity_type.uri != entity_type.display_name:
+                data = entity_type.to_dict()
+
+                property_types = PropertyType.query.filter_by(field_type=data['display_name'])
+                for property_type in property_types:
+                    prop_data = property_type.to_dict()
+                    prop_data['field_type'] = data['uri']
+
+                    self.operation_record_service.update_property_type_record("admin", prop_data, property_type)
+                    property_type.update_by_dict(prop_data, ignore='id,create_at,updated_at')
+
+                if data['description'] == None:
+                    data['description'] = "(备份：" + data['display_name'] + ")"
+                else:
+                    data['description'] += "(备份：" + data['display_name'] + ")"
+                data['display_name'] = data['uri']
+
+                self.operation_record_service.update_entity_type_record("admin", data, entity_type)
+                entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
         db.session.commit()
 
         return "success"
