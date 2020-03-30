@@ -180,6 +180,71 @@ class EntityTypeController:
 
         return 'success'
 
+    @put_route("/entity-types/merge/<source_id>/<target_id>")
+    def merge_entity_type(self, source_id, target_id):
+        operator = "admin"
+
+        source = EntityType.query.filter_by(id=source_id).first()
+        target = EntityType.query.filter_by(id=target_id).first()
+        target_data = target.to_dict()
+
+        # merge children
+        children = EntityType.query.filter_by(father_id=source_id).all()
+        for child in children:
+            child_data = child.to_dict()
+            child_data['father_id'] = target_id
+
+            target_data['has_child'] += 1
+
+            self.operation_record_service.update_entity_type_record(operator, child_data, child)
+            child.update_by_dict(child_data, ignore='id,create_at,updated_at')
+
+        # merge property
+        property_types = PropertyType.query.filter_by(entity_type_id=source_id).all()
+        for property_type in property_types:
+            prop_data = property_type.to_dict()
+            prop_data['entity_type_id'] = target_id
+
+            self.operation_record_service.update_property_type_record(operator, prop_data, property_type)
+            property_type.update_by_dict(prop_data, ignore='id,create_at,updated_at')
+
+        property_types = PropertyType.query.filter_by(field_type=source.uri).all()
+        for property_type in property_types:
+            prop_data = property_type.to_dict()
+            prop_data['field_type'] = target.uri
+
+            self.operation_record_service.update_property_type_record(operator, prop_data, property_type)
+            property_type.update_by_dict(prop_data, ignore='id,create_at,updated_at')
+
+        # merge mapping
+        mappings = ClauseEntityTypeMapping.query.filter_by(object_id=source_id).all()
+        for mapping in mappings:
+            mapping_data = mapping.to_dict()
+            mapping_data['object_id'] = target_id
+            mapping_data['object_uri'] = target.uri
+
+            self.operation_record_service.update_clause_mapping_record(operator, mapping_data, mapping)
+            mapping.update_by_dict(mapping_data, ignore='id,create_at,updated_at')
+
+        mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=source_id).all()
+        for mapping in mappings:
+            mapping_data = mapping.to_dict()
+            mapping_data['concept_id'] = target_id
+            mapping_data['concept_uri'] = target.uri
+
+            self.operation_record_service.update_clause_mapping_record(operator, mapping_data, mapping)
+            mapping.update_by_dict(mapping_data, ignore='id,create_at,updated_at')
+
+        self.operation_record_service.delete_entity_type_record(operator, source)
+        db.session.delete(source)
+
+        self.operation_record_service.update_entity_type_record(operator, target_data, target)
+        target.update_by_dict(target_data, ignore='id,create_at,updated_at')
+
+        db.session.commit()
+
+        return "success"
+
     @get_route('/entity-types/clause/<entity_type_id>')
     def get_relative_clause(self, entity_type_id):
         mappings = ClauseEntityTypeMapping.query.filter(
@@ -216,7 +281,7 @@ class EntityTypeController:
             data['has_child'] = 0
 
             entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
-        db.session.commit()
+
 
         for entity_type in entity_types:
             if entity_type.father_id != 0:
@@ -227,6 +292,7 @@ class EntityTypeController:
                     parent.update_by_dict(data, ignore='id,create_at,updated_at')
                 else:
                     log.warning(f"Entity Type : {entity_type.id} and its father : {entity_type.father_id}")
+
         db.session.commit()
 
         return "success"
@@ -255,6 +321,7 @@ class EntityTypeController:
 
                 self.operation_record_service.update_entity_type_record("admin", data, entity_type)
                 entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+
         db.session.commit()
 
         return "success"
