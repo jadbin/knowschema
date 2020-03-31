@@ -415,13 +415,55 @@ class EntityTypeController:
 
         return "success"
 
-    # @get_route("/entity-types/_checkout_object/<entity_type_id>")
-    # def checkout_object(self, entity_type_id):
-    #     entity_type = EntityType.query.filter_by(id=entity_type_id).first()
-    #
-    #     children_queue = []
-    #     current_parent_id = entity_type_id
-    #     while True:
-    #         children = EntityType.query.filter_by(father_id=current_parent_id).all()
-    #         for child in children:
-    #             children_queue.append(child.id)
+    @put_route("/entity-types/_checkout_is_object/<entity_type_id>")
+    def checkout_is_object(self, entity_type_id):
+        entity_type = EntityType.query.filter_by(id=entity_type_id).first()
+
+        children_queue = [entity_type.id]
+        while True:
+            current_entity_type_id = children_queue.pop()
+
+            # update self
+            current_entity_type = EntityType.query.filter_by(id=current_entity_type_id).first()
+            data = current_entity_type.to_dict()
+            data['is_object'] = 1
+            current_entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+
+            # get children
+            children = EntityType.query.filter_by(father_id=current_entity_type_id).all()
+            for child in children:
+                children_queue.append(child.id)
+
+            if len(children_queue) == 0:
+                break
+
+        db.session.commit()
+
+        return "success"
+
+
+    @put_route("/entity-types/_checkout_is_concept/<entity_type_id>")
+    def checkout_is_concept(self, entity_type_id):
+        entity_type = EntityType.query.filter_by(id=entity_type_id).first()
+
+        children_queue = [entity_type.id]
+        while True:
+            current_entity_type_id = children_queue.pop()
+
+            # update self
+            current_entity_type = EntityType.query.filter_by(id=current_entity_type_id).first()
+            data = current_entity_type.to_dict()
+            data['is_object'] = 0
+            current_entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+
+            # get children
+            children = EntityType.query.filter_by(father_id=current_entity_type_id).all()
+            for child in children:
+                children_queue.append(child.id)
+
+            if len(children_queue) == 0:
+                break
+
+        db.session.commit()
+
+        return "success"
