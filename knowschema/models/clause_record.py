@@ -17,6 +17,6 @@ class ClauseRecord(db.Model):
     concept_id = db.Column(db.Integer)
     concept_uri = db.Column(db.String(255))
     operated_field = db.Column(db.String(255))
-    original_value = db.Column(db.String(2000))
+    original_value = db.Column(db.String(14800))
     new_value = db.Column(db.String(255))
     operated_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
