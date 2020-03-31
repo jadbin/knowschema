@@ -235,6 +235,17 @@ class EntityTypeController:
             self.operation_record_service.update_clause_mapping_record(operator, mapping_data, mapping)
             mapping.update_by_dict(mapping_data, ignore='id,create_at,updated_at')
 
+        # delete source
+        if source.father_id != 0:
+            parent = EntityType.query.filter_by(id=source.father_id).first()
+            if parent:
+                parent_data = parent.to_dict()
+                parent_data['has_child'] -= 1
+                parent.update_by_dict(parent_data, ignore='id,create_at,updated_at')
+                db.session.commit()
+            else:
+                print(source.father_id)
+
         self.operation_record_service.delete_entity_type_record(operator, source)
         db.session.delete(source)
 
@@ -244,6 +255,84 @@ class EntityTypeController:
         db.session.commit()
 
         return "success"
+
+    @put_route("/entity-types/copy/<entity_type_id>")
+    def copy_entity_type(self, entity_type_id):
+        entity_type = EntityType.query.filter_by(id=entity_type_id).first()
+        if entity_type is None:
+            abort(404)
+
+        operator = "admin"
+
+        # copy entity type
+        copy_data = entity_type.to_dict()
+        copy_data['uri'] += "(copy)"
+        copy_data['display_name'] += "(copy)"
+        copy_entity_type = EntityType.from_dict(copy_data, ignore='id,created_at,updated_at')
+
+        try:
+            db.session.add(copy_entity_type)
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI", 400
+        except BaseException as e:
+            db.session.rollback()
+            log.error(e)
+            abort(400)
+
+        self.operation_record_service.create_entity_type_record(operator, copy_entity_type)
+
+        db.session.add(copy_entity_type)
+        db.session.commit()
+
+        if entity_type.father_id != 0:
+            parent = EntityType.query.filter_by(id=entity_type.father_id).first()
+            if parent:
+                parent_data = parent.to_dict()
+                parent_data['has_child'] += 1
+                parent.update_by_dict(parent_data, ignore='id,create_at,updated_at')
+                db.session.commit()
+            else:
+                print(entity_type.father_id)
+
+        # copy property type
+        property_types = PropertyType.query.filter_by(entity_type_id=entity_type_id).all()
+        for property_type in property_types:
+            copy_prop_data = property_type.to_dict()
+            copy_prop_data['entity_type_id'] = copy_entity_type.id
+            copy_property_type = PropertyType.from_dict(copy_prop_data, ignore='id,created_at,updated_at')
+
+            db.session.add(copy_property_type)
+            self.operation_record_service.create_property_type_record(operator, copy_property_type)
+        db.session.commit()
+
+        # copy mappings
+        mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type_id).all()
+        for mapping in mappings:
+            copy_mapping_data = mapping.to_dict()
+            copy_mapping_data['object_id'] = copy_entity_type.id
+            copy_mapping_data['object_uri'] = copy_entity_type.uri
+
+            copy_mapping = ClauseEntityTypeMapping.from_dict(copy_mapping_data, ignore='id,created_at,updated_at')
+            db.session.add(copy_mapping)
+
+            self.operation_record_service.create_clause_mapping_record(operator, copy_mapping)
+        db.session.commit()
+
+        mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type_id).all()
+        for mapping in mappings:
+            copy_mapping_data = mapping.to_dict()
+            copy_mapping_data['concept_id'] = copy_entity_type.id
+            copy_mapping_data['concept_uri'] = copy_entity_type.uri
+
+            copy_mapping = ClauseEntityTypeMapping.from_dict(copy_mapping_data, ignore='id,created_at,updated_at')
+            db.session.add(copy_mapping)
+
+            self.operation_record_service.create_clause_mapping_record(operator, copy_mapping)
+        db.session.commit()
+
+        return jsonify(copy_entity_type.to_dict())
 
     @get_route('/entity-types/clause/<entity_type_id>')
     def get_relative_clause(self, entity_type_id):
@@ -259,20 +348,20 @@ class EntityTypeController:
                 item_id.add(item['id'])
         return jsonify(items)
 
-    @get_route('/entity-types/clause/uri/<entity_type_uri>')
-    def get_entity_type_with_clause_by_uri(self, entity_type_uri):
-        entity_type = EntityType.query.filter_by(uri=entity_type_uri).first()
-        if entity_type is None:
-            abort(404)
+    # @get_route('/entity-types/clause/uri/<entity_type_uri>')
+    # def get_entity_type_with_clause_by_uri(self, entity_type_uri):
+    #     entity_type = EntityType.query.filter_by(uri=entity_type_uri).first()
+    #     if entity_type is None:
+    #         abort(404)
+    #
+    #     mappings = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type.id).all()
+    #     items = []
+    #     for mapping in mappings:
+    #         item = Clause.query.filter_by(id=mapping.clause_id).first().to_dict()
+    #         items.append(item)
+    #     return jsonify(items)
 
-        mappings = ClauseEntityTypeMapping.query.filter_by(entity_type_id=entity_type.id).all()
-        items = []
-        for mapping in mappings:
-            item = Clause.query.filter_by(id=mapping.clause_id).first().to_dict()
-            items.append(item)
-        return jsonify(items)
-
-    @get_route('entity-types/_checkout_child')
+    @get_route('/entity-types/_checkout_child')
     def checkout_child(self):
         entity_types = EntityType.query.all()
 
@@ -297,7 +386,7 @@ class EntityTypeController:
 
         return "success"
 
-    @get_route('entity-types/_checkout_uri')
+    @get_route('/entity-types/_checkout_uri')
     def checkout_uri(self):
         entity_types = EntityType.query.all()
 
@@ -325,3 +414,14 @@ class EntityTypeController:
         db.session.commit()
 
         return "success"
+
+    # @get_route("/entity-types/_checkout_object/<entity_type_id>")
+    # def checkout_object(self, entity_type_id):
+    #     entity_type = EntityType.query.filter_by(id=entity_type_id).first()
+    #
+    #     children_queue = []
+    #     current_parent_id = entity_type_id
+    #     while True:
+    #         children = EntityType.query.filter_by(father_id=current_parent_id).all()
+    #         for child in children:
+    #             children_queue.append(child.id)
