@@ -47,7 +47,10 @@ class EntityTypeController:
         d['property_types'] = [i.to_dict() for i in entity_type.property_types]
         d['parent_property_types'] = self.entity_type_service.get_inherited_properties(entity_type)
 
-        mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id)
+        if entity_type.is_object == 1:
+            mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id)
+        else:
+            mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id)
         d['clauses'] = [i.to_dict() for i in mappings]
 
         return jsonify(d)
@@ -60,6 +63,18 @@ class EntityTypeController:
         entity_type = EntityType.query.filter_by(uri=entity_type_uri).first()
         if entity_type is None:
             abort(404)
+
+        d = entity_type.to_dict()
+
+        d['property_types'] = [i.to_dict() for i in entity_type.property_types]
+        d['parent_property_types'] = self.entity_type_service.get_inherited_properties(entity_type)
+
+        if entity_type.is_object == 1:
+            mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id)
+        else:
+            mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id)
+        d['clauses'] = [i.to_dict() for i in mappings]
+
         return jsonify(entity_type.to_dict())
 
     @get_route("/entity-types/like-query")
