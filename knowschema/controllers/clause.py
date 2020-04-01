@@ -1,3 +1,5 @@
+import logging
+
 from flask import request, abort, jsonify
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
@@ -5,6 +7,7 @@ from knowschema.models import Field, Clause, ClauseEntityTypeMapping, EntityType
 from knowschema.services.operation_record import OperationRecordService
 from knowschema.app import db
 
+log = logging.getLogger(__name__)
 
 @blueprint('/api')
 class ClauseController:
@@ -97,8 +100,14 @@ class ClauseController:
         mappings = ClauseEntityTypeMapping.query.all()
         for mapping in mappings:
             clause = Clause.query.filter_by(id=mapping.clause_id).first()
+            if clause is None:
+                log.warning(f"Error clause id : {mapping.clause_id}")
             obj = EntityType.query.filter_by(id=mapping.object_id).first()
+            if obj is None:
+                log.warning(f"Error object id : {mapping.object_id}")
             concept = EntityType.query.filter_by(id=mapping.concept_id).first()
+            if concept is None:
+                log.warning(f"Error concept id : {mapping.concept_id}")
 
             data = mapping.to_dict()
             data['clause_uri'] = clause.uri
