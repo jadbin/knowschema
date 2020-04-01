@@ -102,12 +102,15 @@ class ClauseController:
             clause = Clause.query.filter_by(id=mapping.clause_id).first()
             if clause is None:
                 log.warning(f"Error clause id : {mapping.clause_id}")
+                continue
             obj = EntityType.query.filter_by(id=mapping.object_id).first()
             if obj is None:
                 log.warning(f"Error object id : {mapping.object_id}")
+                continue
             concept = EntityType.query.filter_by(id=mapping.concept_id).first()
             if concept is None:
                 log.warning(f"Error concept id : {mapping.concept_id}")
+                continue
 
             data = mapping.to_dict()
             data['clause_uri'] = clause.uri
