@@ -273,6 +273,9 @@ class EntityTypeController:
 
     @put_route("/entity-types/copy/<entity_type_id>")
     def copy_entity_type(self, entity_type_id):
+        copy_name = request.json
+        print(copy_name)
+
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
         if entity_type is None:
             abort(404)
@@ -281,8 +284,12 @@ class EntityTypeController:
 
         # copy entity type
         copy_data = entity_type.to_dict()
-        copy_data['uri'] += "(copy)"
-        copy_data['display_name'] += "(copy)"
+        if copy_name is None:
+            copy_data['uri'] += "(copy)"
+            copy_data['display_name'] += "(copy)"
+        else:
+            copy_data['uri'] = copy_name['uri']
+            copy_data['display_name'] = copy_name['uri']
         copy_entity_type = EntityType.from_dict(copy_data, ignore='id,created_at,updated_at')
 
         try:
