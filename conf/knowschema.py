@@ -1,6 +1,6 @@
 # coding=utf-8
 
-jwt = True
+# jwt = True
 # Secret for JWT
 JWT_SECRET = '0pDcIczkJ7ZvLqL353_sGm5Rwf_KNQSFjiXWT3rV9Tg'
 
