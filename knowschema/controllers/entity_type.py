@@ -437,6 +437,53 @@ class EntityTypeController:
 
         return "success"
 
+    @get_route('/entity-types/_restore_uri')
+    def restore_uri(self):
+        entity_types = EntityType.query.all()
+
+        for entity_type in entity_types:
+            if (entity_type.description is not None) and ("备份" in entity_type.description):
+                data = entity_type.to_dict()
+
+                original_uri = data['uri']
+                new_uri = data['description'][4:-1]
+                new_description = data['description'] + "(" + data['uri'] + ")"
+                try:
+                    data['display_name'] = new_uri
+                    data['uri'] = new_uri
+                    data['description'] = new_description
+
+                    self.operation_record_service.update_entity_type_record("admin", data, entity_type)
+                    entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+                    db.session.commit()
+                except:
+                    db.session.rollback()
+
+                    new_uri = "#" + new_uri + "#" + original_uri
+                    data['display_name'] = new_uri
+                    data['uri'] = new_uri
+                    data['description'] = new_description
+
+                    self.operation_record_service.update_entity_type_record("admin", data, entity_type)
+                    entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+                    db.session.commit()
+
+
+                # self.operation_record_service.update_entity_type_record("admin", data, entity_type)
+                # entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
+
+                property_types = PropertyType.query.filter_by(field_type=original_uri)
+                for property_type in property_types:
+                    prop_data = property_type.to_dict()
+                    prop_data['field_type'] = new_uri
+
+                    self.operation_record_service.update_property_type_record("admin", prop_data, property_type)
+                    property_type.update_by_dict(prop_data, ignore='id,create_at,updated_at')
+
+        db.session.commit()
+
+        return "success"
+
     @put_route("/entity-types/_checkout_is_object/<entity_type_id>")
     def checkout_is_object(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
