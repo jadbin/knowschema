@@ -133,8 +133,8 @@ class OperationRecordService:
     def create_entity_type_record(self, operator, new_entity_type):
         self.entity_type_record(operator, "CREATE", new_entity_type.id, new_entity_type.to_dict(), None)
 
-    def update_entity_type_record(self, operator, new_entity: dict, original_entity: object):
-        self.entity_type_record(operator, "UPDATE", original_entity.id, new_entity, original_entity.to_dict())
+    def update_entity_type_record(self, operator, new_entity, original_entity):
+        self.entity_type_record(operator, "UPDATE", original_entity['id'], new_entity, original_entity)
 
     def delete_entity_type_record(self, operator, entity_type):
         self.entity_type_record(operator, "DELETE", entity_type.id, None, entity_type.to_dict())
