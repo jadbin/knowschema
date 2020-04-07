@@ -74,6 +74,19 @@ class EntityTypeService:
                 prop_data['field_type'] = data['display_name']
                 self.property_type_service.update_property_type(prop_data, property_type, operator)
 
+            if entity_type.is_object == 1:
+                mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id).all()
+                for mapping in mappings:
+                    mapping_data = mapping.to_dict()
+                    mapping_data['object_uri'] = data['display_name']
+                    self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+            else:
+                mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id).all()
+                for mapping in mappings:
+                    mapping_data = mapping.to_dict()
+                    mapping_data['concept_uri'] = data['display_name']
+                    self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+
         original_data = entity_type.to_dict()
         try:
             entity_type.update_by_dict(data, ignore='id,create_at,updated_at')
