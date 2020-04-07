@@ -270,6 +270,19 @@ class EntityTypeService:
                     prop_data['field_type'] = data['uri']
                     self.property_type_service.update_property_type(prop_data, property_type, operator)
 
+                if entity_type.is_object == 1:
+                    mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id).all()
+                    for mapping in mappings:
+                        mapping_data = mapping.to_dict()
+                        mapping_data['object_uri'] = data['display_name']
+                        self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+                else:
+                    mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id).all()
+                    for mapping in mappings:
+                        mapping_data = mapping.to_dict()
+                        mapping_data['concept_uri'] = data['display_name']
+                        self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+
                 if data['description'] == None:
                     data['description'] = "(备份：" + data['display_name'] + ")"
                 else:
