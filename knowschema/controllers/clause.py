@@ -42,6 +42,12 @@ class ClauseController:
         result = [i.to_dict() for i in mappings]
         return jsonify(result)
 
+    @get_route("/clause/mapping/<clause_id>")
+    def get_mapping(self, clause_id):
+        mappings = ClauseEntityTypeMapping.query.filter_by(clause_id=clause_id).all()
+        result = [i.to_dict() for i in mappings]
+        return jsonify(result)
+
     @post_route("/clause/mapping")
     def create_clause_entity_type_mapping(self):
         data = request.json
