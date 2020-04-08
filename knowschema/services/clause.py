@@ -17,6 +17,13 @@ class ClauseService:
         self.operation_record_service = operation_record_service
 
     def update_clause(self, data, clause, operator="admin"):
+        if data['uri'] != clause.uri:
+            mappings = ClauseEntityTypeMapping.query.filter_by(clause_id=clause.id).all()
+            for mapping in mappings:
+                mapping_data = mapping.to_dict()
+                mapping_data['clause_uri'] = data['uri']
+                self.update_clause_mapping(mapping_data, mapping, operator)
+
         clause.update_by_dict(data, ignore="id")
         db.session.commit()
 
