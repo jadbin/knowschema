@@ -36,6 +36,15 @@ class ClauseController:
         results = [i.to_dict() for i in clauses]
         return jsonify(results)
 
+    @put_route("/clause/<clause_id>")
+    def update_clause(self, clause_id):
+        clause = Clause.query.filter_by(id=clause_id).first()
+        if clause is None:
+            abort(404)
+        data = request.json
+        result = self.clause_service.update_clause(data, clause)
+        return result
+
     @get_route('/clause/all-mappings')
     def get_all_mappings(self):
         mappings = ClauseEntityTypeMapping.query.all()

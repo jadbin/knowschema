@@ -16,6 +16,12 @@ class ClauseService:
     def __init__(self, operation_record_service: OperationRecordService):
         self.operation_record_service = operation_record_service
 
+    def update_clause(self, data, clause, operator="admin"):
+        clause.update_by_dict(data, ignore="id")
+        db.session.commit()
+
+        return clause.to_dict()
+
     def create_clause_mapping(self, data, operator="admin"):
         mapping = ClauseEntityTypeMapping.from_dict(data, ignore='id,created_at,updated_at')
 
