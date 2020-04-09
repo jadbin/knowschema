@@ -5,8 +5,8 @@ from sqlalchemy import text as _text
 from knowschema import db
 
 
-class ClauseRecord(db.Model):
-    __tablename__ = 'clause_record'
+class FieldRecord(db.Model):
+    __tablename__ = 'field_record'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     operator = db.Column(db.String(255))

@@ -5,14 +5,15 @@ from sqlalchemy import text as _text
 from knowschema import db
 
 
-class Field(db.Model):
-    __tablename__ = 'field'
+class Book(db.Model):
+    __tablename__ = 'book'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     uri = db.Column(db.String(255), unique=True, index=True)
-    count = db.Column(db.Integer)
-    support = db.Column(db.String(255))
+    public_time = db.Column(db.DateTime)
+    public_org = db.Column(db.String(255))
     description = db.Column(db.String(255))
+    field_id = db.Column(db.Integer, db.ForeignKey('field.id'), index=True)
     created_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP"), default=db.func.now())
     updated_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"), default=db.func.now(), onupdate=db.func.now())
-    books = db.relationship('Book', backref=db.backref('field', lazy='joined'), cascade='all, delete-orphan', lazy='select')
+    catalogs = db.relationship('Catalog', backref=db.backref('book', lazy='joined'), cascade='all, delete-orphan', lazy='select')

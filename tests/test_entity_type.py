@@ -11,6 +11,7 @@ param = {
     "uri": "refactoring",
     "display_name": "refactoring",
     "father_id": 4691,
+    "is_object": 1,
 }
 
 headers = {"Content-Type": "application/json"}
@@ -74,7 +75,7 @@ def test_merge_entity_type():
 
 def test_set_meta_type():
     for i in [3983, 3984, 3985, 3986]:
-        url = root_url + "/_checkout_is_object/" + str(i)
+        url = root_url + "/set-object/" + str(i)
         logger.debug(url)
         response = requests.put(url, headers=headers)
         logger.debug(response.status_code)

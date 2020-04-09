@@ -5,16 +5,17 @@ from sqlalchemy import text as _text
 from knowschema import db
 
 
-class ClauseRecord(db.Model):
-    __tablename__ = 'clause_record'
+class ClauseMappingRecord(db.Model):
+    __tablename__ = 'clause_mapping_record'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     operator = db.Column(db.String(255))
     operation_type = db.Column(db.String(255))
-    field_id = db.Column(db.Integer)
-    book_id = db.Column(db.Integer)
-    catalog_id = db.Column(db.Integer)
-    clause_id = db.Column(db.Integer, index=True)
+    clause_mapping_id = db.Column(db.Integer, index=True)
+    object_id = db.Column(db.Integer)
+    object_uri = db.Column(db.String(255))
+    concept_id = db.Column(db.Integer)
+    concept_uri = db.Column(db.String(255))
     operated_field = db.Column(db.String(255))
     original_value = db.Column(db.String(14800))
     new_value = db.Column(db.String(255))

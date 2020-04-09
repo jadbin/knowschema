@@ -45,7 +45,8 @@ class EntityTypeController:
 
         return jsonify(d)
 
-    @get_route('/entity-types/_uri')
+    # @get_route('/entity-types/_uri')
+    @get_route('/entity-types/uri')
     def get_entity_type_by_uri(self):
         entity_type_uri = request.args.get('uri')
         if entity_type_uri is None:
@@ -66,7 +67,8 @@ class EntityTypeController:
 
         return jsonify(entity_type.to_dict())
 
-    @get_route('/entity-types/_all')
+    # @get_route('/entity-types/_all')
+    @get_route('/entity-types/all')
     def get_all_entity_types(self):
         entity_types = EntityType.query.all()
         result = [i.to_dict() for i in entity_types]
@@ -128,14 +130,15 @@ class EntityTypeController:
         else:
             return jsonify(result)
 
-    @put_route("/entity-types/_checkout_is_object/<entity_type_id>")
+    # @put_route("/entity-types/_checkout_is_object/<entity_type_id>")
+    @put_route("/entity-types/set-object/<entity_type_id>")
     def checkout_is_object(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
         self.entity_type_service.set_meta_type(entity_type, is_object=1)
         return "success"
 
-
-    @put_route("/entity-types/_checkout_is_concept/<entity_type_id>")
+    # @put_route("/entity-types/_checkout_is_concept/<entity_type_id>")
+    @put_route("/entity-types/set-concept/<entity_type_id>")
     def checkout_is_concept(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
         self.entity_type_service.set_meta_type(entity_type, is_object=0)

@@ -3,8 +3,6 @@
 import logging
 
 from guniflask.context import service
-
-from sqlalchemy import or_, and_
 from sqlalchemy import exc
 
 from knowschema.app import db

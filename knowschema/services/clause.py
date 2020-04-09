@@ -3,6 +3,7 @@
 import logging
 
 from guniflask.context import service
+from sqlalchemy import exc
 
 from knowschema.models import Clause, ClauseEntityTypeMapping, EntityType
 from knowschema.services.operation_record import OperationRecordService
@@ -16,20 +17,63 @@ class ClauseService:
     def __init__(self, operation_record_service: OperationRecordService):
         self.operation_record_service = operation_record_service
 
+    def update_field(self, data, field, operator="admin"):
+        original_data = field.to_dict()
+        try:
+            field.update_by_dict(data, ignore="id")
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.update_field_record(operator, data, original_data)
+            return field.to_dict()
+
+    def update_book(self, data, book, operator="admin"):
+        original_data = book.to_dict()
+        try:
+            book.update_by_dict(data, ignore="id")
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.update_book_record(operator, data, original_data)
+            return book.to_dict()
+
+    def update_catalog(self, data, catalog, operator="admin"):
+        original_data = catalog.to_dict()
+        try:
+            catalog.update_by_dict(data, ignore="id")
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.update_catalog_record(operator, data, original_data)
+            return catalog.to_dict()
+
     def update_clause(self, data, clause, operator="admin"):
-        if data['uri'] != clause.uri:
-            mappings = ClauseEntityTypeMapping.query.filter_by(clause_id=clause.id).all()
-            for mapping in mappings:
-                mapping_data = mapping.to_dict()
-                mapping_data['clause_uri'] = data['uri']
-                self.update_clause_mapping(mapping_data, mapping, operator)
+        original_data = clause.to_dict()
+        try:
+            clause.update_by_dict(data, ignore="id")
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.update_clause_record(operator, data, original_data)
 
-        clause.update_by_dict(data, ignore="id")
-        db.session.commit()
+            if data.get('uri') is not None and data['uri'] != original_data['uri']:
+                mappings = ClauseEntityTypeMapping.query.filter_by(clause_id=clause.id).all()
+                for mapping in mappings:
+                    mapping_data = mapping.to_dict()
+                    mapping_data['clause_uri'] = data['uri']
+                    self.update_clause_mapping(mapping_data, mapping, operator)
 
-        return clause.to_dict()
+            return clause.to_dict()
 
-    def create_clause_mapping(self, data, operator="admin"):
+    def create_mapping(self, data, operator="admin"):
         mapping = ClauseEntityTypeMapping.from_dict(data, ignore='id,created_at,updated_at')
 
         db.session.add(mapping)
@@ -39,7 +83,7 @@ class ClauseService:
 
         return mapping.to_dict()
 
-    def update_clause_mapping(self, data, mapping, operator="admin"):
+    def update_mapping(self, data, mapping, operator="admin"):
         self.operation_record_service.update_clause_mapping_record(operator, data, mapping)
 
         mapping.update_by_dict(data, ignore='id,create_at,updated_at')
@@ -47,7 +91,7 @@ class ClauseService:
 
         return mapping.to_dict()
 
-    def delete_clause_mapping(self, mapping, operator="admin"):
+    def delete_mapping(self, mapping, operator="admin"):
         self.operation_record_service.delete_clause_mapping_record(operator, mapping)
 
         data = mapping.to_dict()
@@ -57,7 +101,7 @@ class ClauseService:
 
         return data
 
-    def checkout_uri(self):
+    def checkout_mapping_uri(self):
         operator = "admin"
 
         mappings = ClauseEntityTypeMapping.query.all()
