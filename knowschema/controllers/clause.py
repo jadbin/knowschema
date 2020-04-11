@@ -181,3 +181,8 @@ class ClauseController:
     def checkout_mapping_uri(self):
         self.clause_service.checkout_mapping_uri()
         return "success"
+
+    @put_route("/clause/_checkout_match_catalog_clause")
+    def checkout_match_catalog_clause(self):
+        self.clause_service.checkout_match_catalog_clause()
+        return "success"

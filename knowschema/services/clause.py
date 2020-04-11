@@ -5,7 +5,7 @@ import logging
 from guniflask.context import service
 from sqlalchemy import exc
 
-from knowschema.models import Clause, ClauseEntityTypeMapping, EntityType
+from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping, EntityType
 from knowschema.services.operation_record import OperationRecordService
 from knowschema.app import db
 
@@ -136,3 +136,31 @@ class ClauseService:
 
             mapping.update_by_dict(data, ignore='id,create_at,updated_at')
         db.session.commit()
+
+    def checkout_match_catalog_clause(self):
+        from pypinyin import lazy_pinyin
+
+        catalogs = Catalog.query.all()
+        for catalog in catalogs:
+            data = catalog.to_dict()
+
+            name = catalog.uri
+            if name[-2:] == "工作":
+                name = name[:-2]
+            pinyin = lazy_pinyin(name)
+            pinyin = "".join(pinyin)
+
+            data['description'] = pinyin
+
+            self.update_catalog(data, catalog)
+
+        clauses = Clause.query.all()
+        catalogs = Catalog.query.all()
+        for clause in clauses:
+            clause_data = clause.to_dict()
+
+            for catalog in catalogs:
+                if catalog.description in clause.uri:
+                    clause_data['catalog_id'] = catalog.id
+                    self.update_clause(clause_data, clause)
+                    break
