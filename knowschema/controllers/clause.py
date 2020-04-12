@@ -31,6 +31,20 @@ class ClauseController:
         result['books'] = [i.to_dict() for i in field.books]
         return jsonify(result)
 
+    @get_route("/clause/fields/uri")
+    def get_field_by_uri(self):
+        field_uri = request.args.get('uri')
+        if field_uri is None:
+            abort(400)
+
+        field = Field.query.filter_by(uri=field_uri).first()
+        if field is None:
+            abort(404)
+
+        result = field.to_dict()
+        result['books'] = [i.to_dict() for i in field.books]
+        return jsonify(result)
+
     @get_route("/clause/fields/<field_id>/children")
     def get_field_children(self, field_id: int):
         books = Book.query.filter_by(field_id=field_id).all()
@@ -54,8 +68,21 @@ class ClauseController:
 
     @get_route("/clause/books/<book_id>")
     def get_book(self, book_id: int):
-        print("****************************")
         book = Book.query.filter_by(id=book_id).first()
+        if book is None:
+            abort(404)
+
+        result = book.to_dict()
+        result['catalogs'] = [i.to_dict() for i in book.catalogs]
+        return jsonify(result)
+
+    @get_route("/clause/books/uri")
+    def get_book_by_uri(self):
+        book_uri = request.args.get('uri')
+        if book_uri is None:
+            abort(400)
+
+        book = Book.query.filter_by(uri=book_uri).first()
         if book is None:
             abort(404)
 
@@ -94,6 +121,20 @@ class ClauseController:
         result['clauses'] = [i.to_dict() for i in catalog.clauses]
         return jsonify(result)
 
+    @get_route("/clause/catalogs/uri")
+    def get_catalog_by_uri(self):
+        catalog_uri = request.args.get('uri')
+        if catalog_uri is None:
+            abort(400)
+
+        catalog = Catalog.query.filter_by(uri=catalog_uri).first()
+        if catalog is None:
+            abort(404)
+
+        result = catalog.to_dict()
+        result['clauses'] = [i.to_dict() for i in catalog.clauses]
+        return jsonify(result)
+
     @get_route("/clause/catalogs/<catalog_id>/children")
     def get_catalog_children(self, catalog_id: int):
         clauses = Clause.query.filter_by(catalog_id=catalog_id).all()
@@ -119,6 +160,19 @@ class ClauseController:
     @get_route("/clause/clauses/<clause_id>")
     def get_clause(self, clause_id: int):
         clause = Clause.query.filter_by(id=clause_id).first()
+        if clause is None:
+            abort(404)
+        result = clause.to_dict()
+        result['mappings'] = [i.to_dict() for i in clause.clause_entity_type_mappings]
+        return jsonify(result)
+
+    @get_route("/clause/clauses/uri")
+    def get_clause_by_uri(self):
+        clause_uri = request.args.get('uri')
+        if clause_uri is None:
+            abort(400)
+
+        clause = Clause.query.filter_by(uri=clause_uri).first()
         if clause is None:
             abort(404)
         result = clause.to_dict()
