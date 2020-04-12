@@ -16,6 +16,6 @@ class ClauseRecord(db.Model):
     catalog_id = db.Column(db.Integer)
     clause_id = db.Column(db.Integer, index=True)
     operated_field = db.Column(db.String(255))
-    original_value = db.Column(db.String(14800))
-    new_value = db.Column(db.String(255))
+    original_value = db.Column(db.Text)
+    new_value = db.Column(db.Text)
     operated_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
