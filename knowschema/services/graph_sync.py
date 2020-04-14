@@ -56,7 +56,7 @@ class GraphSyncSession:
         assert resp.status_code == 200, resp.text
 
     def _create_all_relations(self):
-        resp = self.session.post('{}/_bulk/relations'.format(self.base_url), json=self.relations)
+        resp = self.session.post('{}/_bulk/relations?by_local=True'.format(self.base_url), json=self.relations)
         assert resp.status_code == 200, resp.text
 
     def close(self):
