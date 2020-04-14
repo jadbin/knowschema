@@ -256,13 +256,18 @@ class OperationRecordService:
         if operation_type == "UPDATE":
             for key, value in new_value.items():
                 if key not in ['id', 'created_at', 'updated_at']:
-                    if value != original_value.get(key):
-                        data['operated_field'] = key
-                        data['original_value'] = original_value[key]
-                        data['new_value'] = new_value[key]
+                    try:
+                        original_value[key]
+                    except KeyError:
+                        continue
+                    else:
+                        if value != original_value[key]:
+                            data['operated_field'] = key
+                            data['original_value'] = original_value[key]
+                            data['new_value'] = new_value[key]
 
-                        new_record = ClauseRecord.from_dict(data, ignore='id')
-                        db.session.add(new_record)
+                            new_record = ClauseRecord.from_dict(data, ignore='id')
+                            db.session.add(new_record)
             db.session.commit()
         elif operation_type == "CREATE":
             for key, value in new_value.items():
