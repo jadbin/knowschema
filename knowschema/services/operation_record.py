@@ -232,14 +232,14 @@ class OperationRecordService:
         self.clause_mapping_record(operator, "DELETE", clause_mapping.id, None, clause_mapping.to_dict())
 
     def clauses_record(self,
-                      operator,
-                      operation_type,
-                      field_id,
-                      book_id,
-                      catalog_id,
-                      clause_id,
-                      new_value,
-                      original_value):
+                       operator,
+                       operation_type,
+                       field_id,
+                       book_id,
+                       catalog_id,
+                       clause_id,
+                       new_value,
+                       original_value):
 
         data = {
             'operator': operator,
@@ -264,8 +264,28 @@ class OperationRecordService:
                         new_record = ClauseRecord.from_dict(data, ignore='id')
                         db.session.add(new_record)
             db.session.commit()
+        elif operation_type == "CREATE":
+            for key, value in new_value.items():
+                if key not in ['id', 'created_at', 'updated_at']:
+                    data['operated_field'] = key
+                    data['new_value'] = value
+
+                    new_record = ClauseRecord.from_dict(data, ignore='id')
+                    db.session.add(new_record)
+            db.session.commit()
+        elif operation_type == "DELETE":
+            del original_value['created_at']
+            del original_value['updated_at']
+
+            store_value = json.dumps(original_value)
+            data['original_value'] = store_value
+
+            new_record = ClauseRecord.from_dict(data, ignore='id')
+            db.session.add(new_record)
+            db.session.commit()
         else:
             pass
+
 
     def get_clauses_ids(self, clause_type: str, original_clause: dict):
         ids = {
@@ -310,28 +330,74 @@ class OperationRecordService:
 
         return ids
 
+
     def update_clauses_record(self, operator, clause_type: str, new_clause: dict, original_clause: dict):
         ids = self.get_clauses_ids(clause_type, original_clause)
         self.clauses_record(operator,
-                           "UPDATE",
-                           ids["field_id"],
-                           ids["book_id"],
-                           ids["catalog_id"],
-                           ids["clause_id"],
-                           new_clause,
-                           original_clause)
+                            "UPDATE",
+                            ids["field_id"],
+                            ids["book_id"],
+                            ids["catalog_id"],
+                            ids["clause_id"],
+                            new_clause,
+                            original_clause)
+
+
+    def create_clauses_record(self, operator, clause_type: str, new_clause: dict):
+        ids = self.get_clauses_ids(clause_type, new_clause)
+        self.clauses_record(operator,
+                            "CREATE",
+                            ids["field_id"],
+                            ids["book_id"],
+                            ids["catalog_id"],
+                            ids["clause_id"],
+                            new_clause,
+                            None)
+
+    def delete_clauses_record(self, operator, clause_type: str, original_clause: dict):
+        ids = self.get_clauses_ids(clause_type, original_clause)
+        self.clauses_record(operator,
+                            "DELETE",
+                            ids["field_id"],
+                            ids["book_id"],
+                            ids["catalog_id"],
+                            ids["clause_id"],
+                            None,
+                            original_clause)
+
 
     def update_field_record(self, operator, new_clause: dict, original_clause: dict):
         self.update_clauses_record(operator, "Field", new_clause, original_clause)
 
-
     def update_book_record(self, operator, new_clause: dict, original_clause: dict):
         self.update_clauses_record(operator, "Book", new_clause, original_clause)
-
 
     def update_catalog_record(self, operator, new_clause: dict, original_clause: dict):
         self.update_clauses_record(operator, "Catalog", new_clause, original_clause)
 
-
     def update_clause_record(self, operator, new_clause: dict, original_clause: dict):
         self.update_clauses_record(operator, "Clause", new_clause, original_clause)
+
+    def create_field_record(self, operator, new_clause: object):
+        self.create_clauses_record(operator, "Field", new_clause.to_dict())
+
+    def create_book_record(self, operator, new_clause: object):
+        self.create_clauses_record(operator, "Book", new_clause.to_dict())
+
+    def create_catalog_record(self, operator, new_clause: object):
+        self.create_clauses_record(operator, "Catalog", new_clause.to_dict())
+
+    def create_clause_record(self, operator, new_clause: object):
+        self.create_clauses_record(operator, "Clause", new_clause.to_dict())
+
+    def delete_field_record(self, operator, original_clause: object):
+        self.delete_clauses_record(operator, "Field", original_clause.to_dict())
+
+    def delete_book_record(self, operator, original_clause: object):
+        self.delete_clauses_record(operator, "Book", original_clause.to_dict())
+
+    def delete_catalog_record(self, operator, original_clause: object):
+        self.delete_clauses_record(operator, "Catalog", original_clause.to_dict())
+
+    def delete_clause_record(self, operator, original_clause: object):
+        self.delete_clauses_record(operator, "Clause", original_clause.to_dict())

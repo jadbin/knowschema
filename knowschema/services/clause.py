@@ -17,6 +17,18 @@ class ClauseService:
     def __init__(self, operation_record_service: OperationRecordService):
         self.operation_record_service = operation_record_service
 
+    def create_field(self, data, operator="admin"):
+        field = Field.from_dict(data, ignore='id,created_at,updated_at')
+        try:
+            db.session.add(field)
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.create_field_record(operator, field)
+            return field.to_dict()
+
     def update_field(self, data, field, operator="admin"):
         original_data = field.to_dict()
         try:
@@ -28,6 +40,25 @@ class ClauseService:
         else:
             self.operation_record_service.update_field_record(operator, data, original_data)
             return field.to_dict()
+
+    def delete_field(self, field, operator="admin"):
+        self.operation_record_service.delete_field_record(operator, field)
+        data = field.to_dict()
+        db.session.delete(field)
+        db.session.commit()
+        return data
+
+    def create_book(self, data, operator="admin"):
+        book = Book.from_dict(data, ignore='id,created_at,updated_at')
+        try:
+            db.session.add(book)
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.create_book_record(operator, book)
+            return book.to_dict()
 
     def update_book(self, data, book, operator="admin"):
         original_data = book.to_dict()
@@ -41,6 +72,25 @@ class ClauseService:
             self.operation_record_service.update_book_record(operator, data, original_data)
             return book.to_dict()
 
+    def delete_book(self, book, operator="admin"):
+        self.operation_record_service.delete_book_record(operator, book)
+        data = book.to_dict()
+        db.session.delete(book)
+        db.session.commit()
+        return data
+
+    def create_catalog(self, data, operator="admin"):
+        catalog = Catalog.from_dict(data, ignore='id,created_at,updated_at')
+        try:
+            db.session.add(catalog)
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.create_catalog_record(operator, catalog)
+            return catalog.to_dict()
+
     def update_catalog(self, data, catalog, operator="admin"):
         original_data = catalog.to_dict()
         try:
@@ -52,6 +102,25 @@ class ClauseService:
         else:
             self.operation_record_service.update_catalog_record(operator, data, original_data)
             return catalog.to_dict()
+
+    def delete_catalog(self, catalog, operator="admin"):
+        self.operation_record_service.delete_catalog_record(operator, catalog)
+        data = catalog.to_dict()
+        db.session.delete(catalog)
+        db.session.commit()
+        return data
+
+    def create_clause(self, data, operator="admin"):
+        clause = Clause.from_dict(data, ignore='id,created_at,updated_at')
+        try:
+            db.session.add(clause)
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return "重复URI"
+        else:
+            self.operation_record_service.create_clause_record(operator, clause)
+            return clause.to_dict()
 
     def update_clause(self, data, clause, operator="admin"):
         original_data = clause.to_dict()
@@ -72,6 +141,13 @@ class ClauseService:
                     self.update_clause_mapping(mapping_data, mapping, operator)
 
             return clause.to_dict()
+
+    def delete_clause(self, clause, operator="admin"):
+        self.operation_record_service.delete_clause_record(operator, clause)
+        data = clause.to_dict()
+        db.session.delete(clause)
+        db.session.commit()
+        return data
 
     def create_mapping(self, data, operator="admin"):
         mapping = ClauseEntityTypeMapping.from_dict(data, ignore='id,created_at,updated_at')

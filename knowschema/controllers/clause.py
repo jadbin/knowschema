@@ -51,6 +51,15 @@ class ClauseController:
         results = [i.to_dict() for i in books]
         return jsonify(results)
 
+    @post_route("/clause/fields")
+    def create_field(self):
+        data = request.json
+        result = self.clause_service.create_field(data)
+        if type(result) != dict:
+            return result, 400
+        else:
+            return jsonify(result)
+
     @put_route("/clause/fields/<field_id>")
     def update_field(self, field_id):
         field = Field.query.filter_by(id=field_id).first()
@@ -59,6 +68,14 @@ class ClauseController:
         data = request.json
         result = self.clause_service.update_field(data, field)
         return result
+
+    @delete_route('/clause/fields/<field_id>')
+    def delete_field(self, field_id):
+        field = Field.query.filter_by(id=field_id).first()
+        if field is None:
+            abort(404)
+        self.clause_service.delete_field(field)
+        return 'success'
 
     @get_route("/clause/books/all")
     def get_all_books(self):
@@ -96,6 +113,15 @@ class ClauseController:
         results = [i.to_dict() for i in catalogs]
         return jsonify(results)
 
+    @post_route("/clause/books")
+    def create_book(self):
+        data = request.json
+        result = self.clause_service.create_book(data)
+        if type(result) != dict:
+            return result, 400
+        else:
+            return jsonify(result)
+
     @put_route("/clause/books/<book_id>")
     def update_book(self, book_id):
         book = Book.query.filter_by(id=book_id).first()
@@ -104,6 +130,14 @@ class ClauseController:
         data = request.json
         result = self.clause_service.update_book(data, book)
         return result
+
+    @delete_route('/clause/books/<book_id>')
+    def delete_book(self, book_id):
+        book = Book.query.filter_by(id=book_id).first()
+        if book is None:
+            abort(404)
+        self.clause_service.delete_book(book)
+        return 'success'
 
     @get_route("/clause/catalogs/all")
     def get_all_catalogs(self):
@@ -141,6 +175,15 @@ class ClauseController:
         results = [i.to_dict() for i in clauses]
         return jsonify(results)
 
+    @post_route("/clause/catalogs")
+    def create_catalog(self):
+        data = request.json
+        result = self.clause_service.create_catalog(data)
+        if type(result) != dict:
+            return result, 400
+        else:
+            return jsonify(result)
+
     @put_route("/clause/catalogs/<catalog_id>")
     def update_catalog(self, catalog_id):
         catalog = Catalog.query.filter_by(id=catalog_id).first()
@@ -149,6 +192,14 @@ class ClauseController:
         data = request.json
         result = self.clause_service.update_catalog(data, catalog)
         return result
+
+    @delete_route('/clause/catalogs/<catalog_id>')
+    def delete_catalog(self, catalog_id):
+        catalog = Catalog.query.filter_by(id=catalog_id).first()
+        if catalog is None:
+            abort(404)
+        self.clause_service.delete_catalog(catalog)
+        return 'success'
 
     # @get_route("/clause/all-clauses")
     @get_route("/clause/clauses/all")
@@ -179,6 +230,15 @@ class ClauseController:
         result['mappings'] = [i.to_dict() for i in clause.clause_entity_type_mappings]
         return jsonify(result)
 
+    @post_route("/clause/clauses")
+    def create_clause(self):
+        data = request.json
+        result = self.clause_service.create_clause(data)
+        if type(result) != dict:
+            return result, 400
+        else:
+            return jsonify(result)
+
     # @put_route("/clause/<clause_id>")
     @put_route("/clause/clauses/<clause_id>")
     def update_clause(self, clause_id):
@@ -188,6 +248,14 @@ class ClauseController:
         data = request.json
         result = self.clause_service.update_clause(data, clause)
         return result
+
+    @delete_route('/clause/clauses/<clause_id>')
+    def delete_clause(self, clause_id):
+        clause = Clause.query.filter_by(id=clause_id).first()
+        if clause is None:
+            abort(404)
+        self.clause_service.delete_clause(clause)
+        return 'success'
 
     # @get_route('/clause/all-mappings')
     @get_route('/clause/mappings/all')

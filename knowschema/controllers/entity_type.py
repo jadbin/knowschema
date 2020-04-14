@@ -132,14 +132,14 @@ class EntityTypeController:
 
     # @put_route("/entity-types/_checkout_is_object/<entity_type_id>")
     @put_route("/entity-types/set-object/<entity_type_id>")
-    def checkout_is_object(self, entity_type_id):
+    def set_object(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
         self.entity_type_service.set_meta_type(entity_type, is_object=1)
         return "success"
 
     # @put_route("/entity-types/_checkout_is_concept/<entity_type_id>")
     @put_route("/entity-types/set-concept/<entity_type_id>")
-    def checkout_is_concept(self, entity_type_id):
+    def set_concept(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
         self.entity_type_service.set_meta_type(entity_type, is_object=0)
         return "success"
