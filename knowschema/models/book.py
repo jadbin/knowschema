@@ -10,7 +10,7 @@ class Book(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     uri = db.Column(db.String(255), unique=True, index=True)
-    public_time = db.Column(db.String(0))
+    public_time = db.Column(db.String(255))
     public_org = db.Column(db.String(255))
     description = db.Column(db.String(255))
     field_id = db.Column(db.Integer, db.ForeignKey('field.id'), index=True)
