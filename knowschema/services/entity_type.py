@@ -146,14 +146,14 @@ class EntityTypeService:
             mapping_data = mapping.to_dict()
             mapping_data['object_id'] = target_id
             mapping_data['object_uri'] = target.uri
-            self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+            self.clause_service.update_mapping(mapping_data, mapping, operator)
 
         mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=source_id).all()
         for mapping in mappings:
             mapping_data = mapping.to_dict()
             mapping_data['concept_id'] = target_id
             mapping_data['concept_uri'] = target.uri
-            self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+            self.clause_service.update_mapping(mapping_data, mapping, operator)
 
         # delete source
         if source.father_id != 0:
@@ -206,14 +206,14 @@ class EntityTypeService:
             copy_mapping_data = mapping.to_dict()
             copy_mapping_data['object_id'] = copy_entity_type['id']
             copy_mapping_data['object_uri'] = copy_entity_type['uri']
-            self.clause_service.create_clause_mapping(copy_mapping_data, operator)
+            self.clause_service.create_mapping(copy_mapping_data, operator)
 
         mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id).all()
         for mapping in mappings:
             copy_mapping_data = mapping.to_dict()
             copy_mapping_data['concept_id'] = copy_entity_type['id']
             copy_mapping_data['concept_uri'] = copy_entity_type['uri']
-            self.clause_service.create_clause_mapping(copy_mapping_data, operator)
+            self.clause_service.create_mapping(copy_mapping_data, operator)
 
         return copy_entity_type
 
@@ -273,13 +273,13 @@ class EntityTypeService:
                     for mapping in mappings:
                         mapping_data = mapping.to_dict()
                         mapping_data['object_uri'] = data['display_name']
-                        self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+                        self.clause_service.update_mapping(mapping_data, mapping, operator)
                 else:
                     mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id).all()
                     for mapping in mappings:
                         mapping_data = mapping.to_dict()
                         mapping_data['concept_uri'] = data['display_name']
-                        self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+                        self.clause_service.update_mapping(mapping_data, mapping, operator)
 
                 if data['description'] == None:
                     data['description'] = "(备份：" + data['display_name'] + ")"

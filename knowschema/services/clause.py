@@ -138,7 +138,7 @@ class ClauseService:
                 for mapping in mappings:
                     mapping_data = mapping.to_dict()
                     mapping_data['clause_uri'] = data['uri']
-                    self.update_clause_mapping(mapping_data, mapping, operator)
+                    self.update_mapping(mapping_data, mapping, operator)
 
             return clause.to_dict()
 
