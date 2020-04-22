@@ -91,7 +91,7 @@ class MainPageController:
 
     @post_route("/main-page/search")
     def search(self):
-        key_word = request.args.get('key')
+        key_word = request.json.get('query')
         results = {}
 
         entity_types_by_uri = EntityType.query.filter(EntityType.uri.like("%" + key_word + "%")).all()
