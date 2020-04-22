@@ -3,7 +3,7 @@
 from flask import request, abort, jsonify
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
-from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping, EntityType
+from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping, EntityType, PropertyType
 
 
 @blueprint('/api')
@@ -88,3 +88,45 @@ class MainPageController:
         }
 
         return jsonify(result)
+
+    @post_route("/main-page/search")
+    def search(self):
+        key_word = request.args.get('key')
+        results = {}
+
+        entity_types_by_uri = EntityType.query.filter(EntityType.uri.like("%" + key_word + "%")).all()
+        entity_types_by_description = EntityType.query.filter(EntityType.description.like("%" + key_word + "%")).all()
+        entity_types = list(set(entity_types_by_uri + entity_types_by_description))
+        results['entity-types'] = [i.to_dict() for i in entity_types]
+
+        # property_types_by_uri = PropertyType.query.filter(PropertyType.uri.like("%" + key_word + "%")).all()
+        # property_types_by_description = PropertyType.query.filter(PropertyType.description.like("%" + key_word + "%")).all()
+        # property_types = list(set(property_types_by_uri + property_types_by_description))
+        # results['property-types'] = [i.to_dict() for i in property_types]
+        #
+        # fields_by_uri = Field.query.filter(Field.uri.like("%" + key_word + "%")).all()
+        # fields_by_description = Field.query.filter(Field.description.like("%" + key_word + "%")).all()
+        # fields = list(set(fields_by_uri + fields_by_description))
+        # results['fields'] = [i.to_dict() for i in fields]
+        #
+        # books_by_uri = Book.query.filter(Book.uri.like("%" + key_word + "%")).all()
+        # books_by_description = Book.query.filter(Book.description.like("%" + key_word + "%")).all()
+        # books = list(set(books_by_uri + books_by_description))
+        # results['books'] = [i.to_dict() for i in books]
+        #
+        # catalogs_by_uri = Catalog.query.filter(Catalog.uri.like("%" + key_word + "%")).all()
+        # catalogs_by_description = Catalog.query.filter(Catalog.description.like("%" + key_word + "%")).all()
+        # catalogs = list(set(catalogs_by_uri + catalogs_by_description))
+        # results['catalogs'] = [i.to_dict() for i in catalogs]
+        #
+        # clauses_by_uri = Clause.query.filter(Clause.uri.like("%" + key_word + "%")).all()
+        # clauses_by_content = Clause.query.filter(Clause.content.like("%" + key_word + "%")).all()
+        # clauses = list(set(clauses_by_uri + clauses_by_content))
+        # results['clauses'] = [i.to_dict() for i in clauses]
+        #
+        # mappings_by_uri = ClauseEntityTypeMapping.query.filter(ClauseEntityTypeMapping.uri.like("%" + key_word + "%")).all()
+        # mappings_by_description = ClauseEntityTypeMapping.query.filter(ClauseEntityTypeMapping.description.like("%" + key_word + "%")).all()
+        # mappings = list(set(mappings_by_uri + mappings_by_description))
+        # results['mappings'] = [i.to_dict() for i in mappings]
+
+        return jsonify(results)
