@@ -98,6 +98,8 @@ class GraphSyncController:
                             data['head_local_id'] = "Concept:" + head_entity_type.uri
 
                         tail_entity_type = EntityType.query.filter_by(uri=property_type.field_type).first()
+                        if tail_entity_type is None:
+                            continue
                         if tail_entity_type.is_object == 1:
                             data['tail_local_id'] = "Object:" + tail_entity_type.uri
                         else:
