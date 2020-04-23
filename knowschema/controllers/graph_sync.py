@@ -4,6 +4,7 @@ from flask import abort
 
 from guniflask.web import blueprint, post_route
 from guniflask.scheduling import scheduled
+from guniflask.config import settings
 
 from knowschema.services.graph_sync import GraphSyncService
 from knowschema.models import Clause, Catalog, Book, Field, EntityType, ClauseEntityTypeMapping
@@ -162,4 +163,7 @@ class GraphSyncController:
         """
         5分钟同步一次
         """
-        self.sync_all()
+        if settings.get('development') == True:
+            log.debug("Development mode. Not sync")
+        else:
+            self.sync_all()
