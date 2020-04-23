@@ -32,7 +32,7 @@ class GraphSyncController:
             for clause in clauses:
                 data = {}
                 data['local_id'] = "Clause:" + clause.uri
-                data['entity_type'] = "clause"
+                data['entity_type'] = "保密事项"
                 data['entity_name'] = clause.uri
                 data['properties'] = {
                     "事项编号": clause.uri,
@@ -58,10 +58,10 @@ class GraphSyncController:
                 data = {}
                 if entity_type.is_object == 1:
                     data['local_id'] = "Object:" + entity_type.uri
-                    data['entity_type'] = "object"
+                    data['entity_type'] = "保密对象"
                 else:
                     data['local_id'] = "Concept:" + entity_type.uri
-                    data['entity_type'] = "concept"
+                    data['entity_type'] = "保密内容"
                 data['entity_name'] = entity_type.uri
                 data['properties'] = {}
                 for property_type in entity_type.property_types:
