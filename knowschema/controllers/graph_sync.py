@@ -158,7 +158,7 @@ class GraphSyncController:
 
         return "success"
 
-    @scheduled(interval=5 * 60)
+    @scheduled(cron="59 23 * * *")
     def scheduled_sync_all(self):
         """
         5分钟同步一次
