@@ -77,13 +77,13 @@ class EntityTypeService:
                 for mapping in mappings:
                     mapping_data = mapping.to_dict()
                     mapping_data['object_uri'] = data['display_name']
-                    self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+                    self.clause_service.update_mapping(mapping_data, mapping, operator)
             else:
                 mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id).all()
                 for mapping in mappings:
                     mapping_data = mapping.to_dict()
                     mapping_data['concept_uri'] = data['display_name']
-                    self.clause_service.update_clause_mapping(mapping_data, mapping, operator)
+                    self.clause_service.update_mapping(mapping_data, mapping, operator)
 
         original_data = entity_type.to_dict()
         try:
