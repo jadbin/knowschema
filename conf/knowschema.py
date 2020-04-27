@@ -10,3 +10,5 @@ guniflask = dict(
     cors=True,
     authorization_server='https://uaa.kdsec.org',
 )
+
+UPLOAD_DIR = "knowschema/files/"

@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import logging
+import csv
 
 from guniflask.context import service
 from sqlalchemy import exc
@@ -240,3 +241,65 @@ class ClauseService:
                     clause_data['catalog_id'] = catalog.id
                     self.update_clause(clause_data, clause)
                     break
+
+    def create_clause_from_file(self, file_path, operator="admin"):
+        status = []
+        reader = csv.reader(open(file_path, "r"))
+        for item in reader:
+            if reader.line_num == 1:
+                continue
+
+            target_catalog = item[0]
+            target_clause_uri = item[1]
+            target_clause_content = item[2]
+
+            catalog = Catalog.query.filter_by(uri=target_catalog).first()
+            if catalog is None:
+                status.append(f"invalid catalog {target_catalog}")
+                continue
+            elif catalog.book_id != 1:
+                status.append(f"invalid book of {target_catalog}")
+                continue
+
+            clause = Clause.query.filter_by(uri=target_clause_uri).first()
+            if clause is not None:
+                data = clause.to_dict()
+                if data['content'] is not None:
+                    status.append(f"clause {target_clause_uri} is not none")
+                    continue
+
+                data['content'] = target_clause_content
+                self.update_clause(data, clause, operator)
+            else:
+                data = {
+                    "uri": target_clause_uri,
+                    "content": target_clause_content,
+                    "catalog_id": catalog.id
+                }
+
+                self.create_clause(data, operator)
+
+    def create_mapping_from_file(self, file_path, operator="admin"):
+        status = []
+        reader = csv.reader(open(file_path, "r"))
+        for item in reader:
+            if reader.line_num == 1:
+                continue
+
+            target_clause_uri = item[0]
+            target_mapping_object_name = item[1]
+            target_mapping_concept_name =  item[3]
+
+            clause = Clause.query.filter_by(uri=target_clause_uri).first()
+            if clause is None:
+                status.append(f"invalid clause {target_clause_uri}")
+                continue
+
+            data = {
+                "clause_id": clause.id,
+                "clause_uri": clause.uri,
+                "object_name": target_mapping_object_name,
+                "concept_name": target_mapping_concept_name
+            }
+
+            self.create_mapping(data, operator)

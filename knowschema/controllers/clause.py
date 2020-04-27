@@ -1,12 +1,19 @@
 import logging
+import os
 
 from flask import request, abort, jsonify
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
+from guniflask.config import settings
 
 from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping
 from knowschema.services.clause import ClauseService
 
 log = logging.getLogger(__name__)
+
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = set(['csv'])
+    return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 @blueprint('/api')
 class ClauseController:
@@ -308,3 +315,29 @@ class ClauseController:
     def checkout_match_catalog_clause(self):
         self.clause_service.checkout_match_catalog_clause()
         return "success"
+
+    @post_route("/clause/clauses/upload-file")
+    def create_clause_from_file(self):
+        file = request.files.get('file')
+
+        if file and allowed_file(file.filename):
+            file_path = os.path.join(settings.get('UPLOAD_DIR'), file.filename)
+            file.save(file_path)
+
+            status = self.clause_service.create_clause_from_file(file_path)
+            return jsonify(status)
+        else:
+            return "invalid file"
+
+    @post_route("/clause/mappings/upload-file")
+    def create_mapping_from_file(self):
+        file = request.files.get('file')
+
+        if file and allowed_file(file.filename):
+            file_path = os.path.join(settings.get('UPLOAD_DIR'), file.filename)
+            file.save(file_path)
+
+            status = self.clause_service.create_mapping_from_file(file_path)
+            return jsonify(status)
+        else:
+            return "invalid file"
