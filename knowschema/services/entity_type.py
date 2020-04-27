@@ -97,6 +97,20 @@ class EntityTypeService:
             return entity_type.to_dict()
 
     def delete_entity_type(self, entity_type, operator="admin"):
+        # delete relative mapping
+        if entity_type.is_object == 1:
+            mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id).all()
+        elif entity_type.is_object == 0:
+            mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id).all()
+
+        for mapping in mappings:
+            self.clause_service.delete_mapping(mapping, operator)
+
+        # delete relative property
+        property_types = PropertyType.query.filter_by(entity_type_id=entity_type.id).all()
+        for property_type in property_types:
+            self.property_type_service.delete_property_type(property_type)
+
         self.operation_record_service.delete_entity_type_record(operator, entity_type)
 
         data = entity_type.to_dict()
