@@ -164,5 +164,5 @@ class EntityTypeController:
         entity_types = EntityType.query.all()
         for entity_type in entity_types:
             if entity_type.uri != entity_type.display_name:
-                print(entity_type.id, entity_type.uri)
+                print(entity_type.id, entity_type.uri, entity_type.display_name)
         return "success"
