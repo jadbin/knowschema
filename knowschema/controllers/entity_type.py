@@ -158,3 +158,11 @@ class EntityTypeController:
     def restore_uri(self):
         self.entity_type_service.restore_uri()
         return "success"
+
+    @get_route("/entity-types/_find_unmatch")
+    def find_unmatch(self):
+        entity_types = EntityType.query.all()
+        for entity_type in entity_types:
+            if entity_type.uri != entity_type.display_name:
+                print(entity_type.id, entity_type.uri)
+        return "success"
