@@ -65,25 +65,27 @@ class EntityTypeService:
                 new_parent_data['has_child'] += 1
                 self.update_entity_type(new_parent_data, new_parent, operator)
 
-        if data['display_name'] != entity_type.display_name:
-            property_types = PropertyType.query.filter_by(field_type=entity_type.display_name).all()
+        if data['uri'] != entity_type.uri:
+            property_types = PropertyType.query.filter_by(field_type=entity_type.uri).all()
             for property_type in property_types:
                 prop_data = property_type.to_dict()
-                prop_data['field_type'] = data['display_name']
+                prop_data['field_type'] = data['uri']
                 self.property_type_service.update_property_type(prop_data, property_type, operator)
 
             if entity_type.is_object == 1:
                 mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id).all()
                 for mapping in mappings:
                     mapping_data = mapping.to_dict()
-                    mapping_data['object_uri'] = data['display_name']
+                    mapping_data['object_uri'] = data['uri']
                     self.clause_service.update_mapping(mapping_data, mapping, operator)
             else:
                 mappings = ClauseEntityTypeMapping.query.filter_by(concept_id=entity_type.id).all()
                 for mapping in mappings:
                     mapping_data = mapping.to_dict()
-                    mapping_data['concept_uri'] = data['display_name']
+                    mapping_data['concept_uri'] = data['uri']
                     self.clause_service.update_mapping(mapping_data, mapping, operator)
+
+            data['display_name'] = data['uri']
 
         original_data = entity_type.to_dict()
         try:
