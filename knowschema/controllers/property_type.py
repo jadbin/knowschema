@@ -49,3 +49,14 @@ class PropertyTypeController:
         self.property_type_service.delete_property_type(property_type)
 
         return 'success'
+
+    @get_route("/property-types/_checkout_entity_type_uri")
+    def checkout_entity_type_uri(self):
+        property_types = PropertyType.query.all()
+        for property_type in property_types:
+            if property_type.is_entity == 1:
+                entity_type = EntityType.query.filter_by(uri=property_type.field_type).first()
+                if entity_type is None:
+                    print(property_type.id, property_type.uri, property_type.field_type)
+
+        return "success"
