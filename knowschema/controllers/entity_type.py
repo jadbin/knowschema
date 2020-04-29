@@ -45,7 +45,6 @@ class EntityTypeController:
 
         return jsonify(d)
 
-    # @get_route('/entity-types/_uri')
     @get_route('/entity-types/uri')
     def get_entity_type_by_uri(self):
         entity_type_uri = request.args.get('uri')
@@ -67,10 +66,25 @@ class EntityTypeController:
 
         return jsonify(entity_type.to_dict())
 
-    # @get_route('/entity-types/_all')
     @get_route('/entity-types/all')
     def get_all_entity_types(self):
         entity_types = EntityType.query.all()
+        result = [i.to_dict() for i in entity_types]
+        return jsonify(result)
+
+    @get_route('/entity-types/list')
+    def get_entity_type_list(self):
+        key_word = request.args.get('query')
+
+        if key_word == "object":
+            is_object = 1
+        elif key_word == "concept":
+            is_object = 0
+        else:
+            log.warning(f"错误类型 {key_word}")
+            return "错误类型", 400
+
+        entity_types = EntityType.query.filter_by(is_object=is_object).all()
         result = [i.to_dict() for i in entity_types]
         return jsonify(result)
 
@@ -89,6 +103,10 @@ class EntityTypeController:
         if entity_type is None:
             abort(404)
         data = request.json
+
+        if data['is_object'] != entity_type.is_object:
+            self.entity_type_service.set_meta_type(entity_type, data['is_object'])
+
         result = self.entity_type_service.update_entity_type(data, entity_type)
         if type(result) != dict:
             return result, 400
@@ -130,14 +148,12 @@ class EntityTypeController:
         else:
             return jsonify(result)
 
-    # @put_route("/entity-types/_checkout_is_object/<entity_type_id>")
     @put_route("/entity-types/set-object/<entity_type_id>")
     def set_object(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
         self.entity_type_service.set_meta_type(entity_type, is_object=1)
         return "success"
 
-    # @put_route("/entity-types/_checkout_is_concept/<entity_type_id>")
     @put_route("/entity-types/set-concept/<entity_type_id>")
     def set_concept(self, entity_type_id):
         entity_type = EntityType.query.filter_by(id=entity_type_id).first()
