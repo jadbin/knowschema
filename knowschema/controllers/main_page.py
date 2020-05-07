@@ -49,7 +49,7 @@ class MainPageController:
 
         # 事项匹配数量 & 事项匹配比例
         mappings = ClauseEntityTypeMapping.query.all()
-        has_mapping_clauses = [i.clause_id for i in mappings]
+        has_mapping_clauses = [i.clause_id for i in mappings if i.concept_id is not None]
         has_mapping_clauses = list(set(has_mapping_clauses))
         has_mapping_clauses_num = len(has_mapping_clauses)
         has_mapping_clauses_rate = has_mapping_clauses_num / clause_num
@@ -62,7 +62,9 @@ class MainPageController:
                                 for clause in Clause.query.filter_by(catalog_id=catalog.id).all()]
             has_mapping_relative_clauses = [clause
                                             for clause in relative_clauses
-                                            if len(ClauseEntityTypeMapping.query.filter_by(clause_id=clause.id).all()) > 0]
+                                            if len(ClauseEntityTypeMapping.query
+                                                   .filter_by(clause_id=clause.id)
+                                                   .filter(ClauseEntityTypeMapping.concept_uri != None).all()) > 0]
             relative_clauses_num = len(relative_clauses)
             has_mapping_relative_clauses_num = len(has_mapping_relative_clauses)
             rate = has_mapping_relative_clauses_num / (relative_clauses_num + 1e-5)
