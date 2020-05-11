@@ -20,14 +20,52 @@ class ClauseController:
     def __init__(self, clause_service: ClauseService):
         self.clause_service = clause_service
 
-    # @get_route("/clause/all-fields")
+    @get_route('/clause/all')
+    def get_all(self):
+        results = []
+
+        # add field
+        fields = Field.query.all()
+        for field in fields:
+            field_data = field.to_dict()
+            field_data['id'] = "field_" + str(field_data['id'])
+            field_data['books'] = []
+
+            # add book
+            books = field.books
+            for book in books:
+                book_data = book.to_dict()
+                book_data['id'] = "book_" + str(book_data['id'])
+                book_data['catalogs'] = []
+
+                # add catalog
+                catalogs = book.catalogs
+                for catalog in catalogs:
+                    catalog_data = catalog.to_dict()
+                    catalog_data['id'] = "catalog_" + str(catalog_data['id'])
+                    catalog_data['clauses'] = []
+
+                    # add clause
+                    clauses = catalog.clauses
+                    for clause in clauses:
+                        clause_data = clause.to_dict()
+                        clause_data['id'] = "clause_" + str(clause_data['id'])
+                        catalog_data['clauses'].append(clause_data)
+
+                    book_data['catalogs'].append(catalog_data)
+
+                field_data['books'].append(book_data)
+
+            results.append(field_data)
+
+        return jsonify(results)
+
     @get_route("/clause/fields/all")
     def get_all_fields(self):
         fields = Field.query.all()
         result = [i.to_dict() for i in fields]
         return jsonify(result)
 
-    # @get_route("/clause/field/<field_id>")
     @get_route("/clause/fields/<field_id>")
     def get_field(self, field_id: int):
         field = Field.query.filter_by(id=field_id).first()
@@ -208,7 +246,6 @@ class ClauseController:
         self.clause_service.delete_catalog(catalog)
         return 'success'
 
-    # @get_route("/clause/all-clauses")
     @get_route("/clause/clauses/all")
     def get_all_clauses(self):
         clauses = Clause.query.all()
@@ -246,7 +283,6 @@ class ClauseController:
         else:
             return jsonify(result)
 
-    # @put_route("/clause/<clause_id>")
     @put_route("/clause/clauses/<clause_id>")
     def update_clause(self, clause_id):
         clause = Clause.query.filter_by(id=clause_id).first()
@@ -264,28 +300,24 @@ class ClauseController:
         self.clause_service.delete_clause(clause)
         return 'success'
 
-    # @get_route('/clause/all-mappings')
     @get_route('/clause/mappings/all')
     def get_all_mappings(self):
         mappings = ClauseEntityTypeMapping.query.all()
         result = [i.to_dict() for i in mappings]
         return jsonify(result)
 
-    # @get_route("/clause/mapping/<clause_id>")
     @get_route("/clause/mappings/<clause_id>")
     def get_mapping(self, clause_id):
         mappings = ClauseEntityTypeMapping.query.filter_by(clause_id=clause_id).all()
         result = [i.to_dict() for i in mappings]
         return jsonify(result)
 
-    # @post_route("/clause/mapping")
     @post_route("/clause/mappings")
     def create_mapping(self):
         data = request.json
         result = self.clause_service.create_mapping(data)
         return jsonify(result)
 
-    # @put_route("/clause/mapping/<mapping_id>")
     @put_route("/clause/mappings/<mapping_id>")
     def update_mapping(self, mapping_id):
         mapping = ClauseEntityTypeMapping.query.filter_by(id=mapping_id).first()
@@ -295,7 +327,6 @@ class ClauseController:
         self.clause_service.update_mapping(data, mapping)
         return 'success'
 
-    # @delete_route('/clause/mapping/<mapping_id>')
     @delete_route('/clause/mappings/<mapping_id>')
     def delete_mapping(self, mapping_id):
         mapping = ClauseEntityTypeMapping.query.filter_by(id=mapping_id).first()
@@ -305,7 +336,6 @@ class ClauseController:
         self.clause_service.delete_mapping(mapping)
         return 'success'
 
-    # @put_route('/clause/mapping/_checkout_uri')
     @put_route('/clause/mappings/_checkout_uri')
     def checkout_mapping_uri(self):
         self.clause_service.checkout_mapping_uri()
