@@ -49,10 +49,23 @@ class MainPageController:
 
         # 事项匹配数量 & 事项匹配比例
         mappings = ClauseEntityTypeMapping.query.all()
-        has_mapping_clauses = [i.clause_id for i in mappings if i.concept_id is not None]
-        has_mapping_clauses = list(set(has_mapping_clauses))
-        has_mapping_clauses_num = len(has_mapping_clauses)
+
+        all_mappings = [i.clause_id for i in mappings]
+        all_mappings_clauses_list = list(set(all_mappings))
+        all_mappings_clauses_num = len(all_mappings_clauses_list)
+        all_clauses = [i.id for i in clauses]
+        first_non_mapping_clauses_list = [i for i in all_mappings_clauses_list if i not in all_clauses]
+        first_non_mapping_clauses_num = clause_num - all_mappings_clauses_num
+
+        has_mapping_clauses = set([i.clause_id for i in mappings if i.concept_id is not None])
+        non_concept_in_mapping_clauses = set([i.clause_id for i in mappings if i.concept_id is None])
+        second_non_mapping_clauses_list = list(non_concept_in_mapping_clauses - has_mapping_clauses)
+        second_non_mapping_clauses_num = len(second_non_mapping_clauses_list)
+
+        has_mapping_clauses_num = clause_num - first_non_mapping_clauses_num - second_non_mapping_clauses_num
         has_mapping_clauses_rate = has_mapping_clauses_num / clause_num
+        non_mapping_clauses_list = first_non_mapping_clauses_list + second_non_mapping_clauses_list
+        non_mapping_clauses_list = [Clause.query.filter_by(id=i).first().uri for i in non_mapping_clauses_list]
 
         # 知识中事项匹配统计
         def get_field_stat(field):
@@ -86,7 +99,8 @@ class MainPageController:
             "expert_entity_type_num": expert_entity_type_num,
             "has_mapping_clauses_num": has_mapping_clauses_num,
             "has_mapping_clauses_rate": has_mapping_clauses_rate,
-            "clause_per_field_num": clause_per_field_num
+            "clause_per_field_num": clause_per_field_num,
+            "non_mapping_clauses_list": non_mapping_clauses_list
         }
 
         return jsonify(result)
