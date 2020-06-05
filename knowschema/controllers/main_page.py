@@ -54,7 +54,7 @@ class MainPageController:
         all_mappings_clauses_list = list(set(all_mappings))
         all_mappings_clauses_num = len(all_mappings_clauses_list)
         all_clauses = [i.id for i in clauses]
-        first_non_mapping_clauses_list = [i for i in all_mappings_clauses_list if i not in all_clauses]
+        first_non_mapping_clauses_list = [i for i in all_clauses if i not in all_mappings_clauses_list]
         first_non_mapping_clauses_num = clause_num - all_mappings_clauses_num
 
         has_mapping_clauses = set([i.clause_id for i in mappings if i.concept_id is not None])
