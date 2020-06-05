@@ -75,6 +75,10 @@ class GraphSyncController:
             for child in entity_types:
                 if child.father_id != 0:
                     parent = EntityType.query.filter_by(id=child.father_id).first()
+                    if parent is None:
+                        log.warning(f"Parent is None. Child : {child.id}")
+                        continue
+
                     data = {}
                     if parent.is_object == 1:
                         data['head_local_id'] = "Object:" + parent.uri
