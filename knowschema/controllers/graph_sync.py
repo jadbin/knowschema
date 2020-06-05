@@ -76,7 +76,7 @@ class GraphSyncController:
                 if child.father_id != 0:
                     parent = EntityType.query.filter_by(id=child.father_id).first()
                     if parent is None:
-                        log.warning(f"Parent is None. Child : {child.id}")
+                        log.warning(f"Parent is None. child : {child.id}, parent : {child.father_id}")
                         continue
 
                     data = {}
