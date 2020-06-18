@@ -12,3 +12,5 @@ guniflask = dict(
 )
 
 UPLOAD_DIR = "knowschema/files/"
+
+GRAPH_BACKUP_FILE = "knowschema/files/graph_backup.json"

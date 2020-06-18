@@ -1,4 +1,5 @@
 import logging
+import json
 
 from flask import abort
 
@@ -26,6 +27,9 @@ class GraphSyncController:
             """
             组装节点和关系
             """
+            entities = []
+            relationes = []
+
             # TODO: Add entities
             # add clause
             clauses = Clause.query.all()
@@ -41,6 +45,7 @@ class GraphSyncController:
                     "保密期限": clause.time_limit,
                     "知悉范围": clause.insider,
                 }
+
                 catalog = Catalog.query.filter_by(id=clause.catalog_id).first()
                 if catalog is None:
                     print(clause.id, clause.uri)
@@ -50,7 +55,9 @@ class GraphSyncController:
                 data['properties']["知识来源"] = book.uri
                 field = Field.query.filter_by(id=book.field_id).first()
                 data['properties']["知识类别"] = field.uri
+
                 session.add_entity(**data)
+                entities.append(data)
 
             # add entity type
             entity_types = EntityType.query.all()
@@ -67,7 +74,9 @@ class GraphSyncController:
                 for property_type in entity_type.property_types:
                     if property_type.is_entity == 0:
                         data['properties'][property_type.uri] = property_type.field_type
+
                 session.add_entity(**data)
+                entities.append(data)
 
             # TODO: Add relations
             # is_a relation
@@ -89,7 +98,9 @@ class GraphSyncController:
                     else:
                         data['tail_local_id'] = "Concept:" + child.uri
                     data['relation_type'] = "is_a"
+
                     session.add_relation(**data)
+                    relationes.append(data)
 
             # property
             entity_types = EntityType.query.all()
@@ -110,7 +121,9 @@ class GraphSyncController:
                         else:
                             data['tail_local_id'] = "Concept:" + tail_entity_type.uri
                         data['relation_type'] = property_type.uri
+
                         session.add_relation(**data)
+                        relationes.append(data)
 
             # clause
             mappings = ClauseEntityTypeMapping.query.all()
@@ -132,12 +145,14 @@ class GraphSyncController:
                     data['tail_local_id'] = "Clause:" + clause.uri
                     data['relation_type'] = "包含事项"
                     session.add_relation(**data)
+                    relationes.append(data)
 
                     data = {}
                     data['head_local_id'] = "Concept:" + concept.uri
                     data['tail_local_id'] = "Clause:" + clause.uri
                     data['relation_type'] = "包含事项"
                     session.add_relation(**data)
+                    relationes.append(data)
 
                     # 保密对象
                     data = {}
@@ -145,6 +160,7 @@ class GraphSyncController:
                     data['tail_local_id'] = "Object:" + obj.uri
                     data['relation_type'] = "保密对象"
                     session.add_relation(**data)
+                    relationes.append(data)
 
                     # 保密内容
                     data = {}
@@ -152,6 +168,7 @@ class GraphSyncController:
                     data['tail_local_id'] = "Concept:" + concept.uri
                     data['relation_type'] = "保密内容"
                     session.add_relation(**data)
+                    relationes.append(data)
 
                     # 事项组合
                     data = {}
@@ -159,6 +176,14 @@ class GraphSyncController:
                     data['tail_local_id'] = "Concept:" + concept.uri
                     data['relation_type'] = "事项组合"
                     session.add_relation(**data)
+                    relationes.append(data)
+
+        # TODO: Backup graph
+        backup_data = [entities, relationes]
+        backup_file = settings.get("GRAPH_BACKUP_FILE")
+
+        with open(backup_file, "w") as f:
+            json.dump(backup_data, f)
 
         return "success"
 
