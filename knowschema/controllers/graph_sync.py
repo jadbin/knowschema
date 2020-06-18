@@ -23,13 +23,13 @@ class GraphSyncController:
         """
         手动备份
         """
+        entities = []
+        relationes = []
+
         with self.graph_sync_service.session() as session:
             """
             组装节点和关系
             """
-            entities = []
-            relationes = []
-
             # TODO: Add entities
             # add clause
             clauses = Clause.query.all()
