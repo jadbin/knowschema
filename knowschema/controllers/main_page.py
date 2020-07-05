@@ -31,8 +31,9 @@ class MainPageController:
 
         # 普通用户添加概念总数
         entity_types = EntityType.query.all()
+
         common_user_entity_type_num = {
-            "total_entity_type_num": len(entity_types),
+            "total_entity_type_num": 0,
             "level_1_num": 0,
             "level_2_num": 0,
             "level_3_num": 0
@@ -43,6 +44,8 @@ class MainPageController:
         common_user_entity_type_num['level_2_num'] = len(level_2_entity_type)
         level_3_entity_type = [j for i in level_2_entity_type for j in EntityType.query.filter_by(father_id=i.id).all()]
         common_user_entity_type_num['level_3_num'] = len(level_3_entity_type)
+
+        common_user_entity_type_num['total_entity_type_num'] = common_user_entity_type_num['level_1_num'] + common_user_entity_type_num['level_2_num'] + common_user_entity_type_num['level_3_num']
 
         # 领域专家确认概念总数
         expert_entity_type_num = 0
