@@ -9,6 +9,7 @@ from guniflask.config import settings
 
 from knowschema.services.graph_sync import GraphSyncService
 from knowschema.models import Clause, Catalog, Book, Field, EntityType, ClauseEntityTypeMapping
+from knowschema.utils.unique_scheduled import unique_scheduled
 
 log = logging.getLogger(__name__)
 
@@ -187,7 +188,8 @@ class GraphSyncController:
 
         return "success"
 
-    @scheduled(cron="59 23 * * *")
+    # @scheduled(cron="59 23 * * *")
+    @unique_scheduled(cron="59 23 * * *")
     def scheduled_sync_all(self):
         """
         5分钟同步一次
