@@ -184,7 +184,7 @@ class GraphSyncController:
         backup_file = settings.get("GRAPH_BACKUP_FILE")
 
         with open(backup_file, "w") as f:
-            json.dump(backup_data, f)
+            json.dump(backup_data, f, ensure_ascii=False)
 
         return "success"
 
