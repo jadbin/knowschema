@@ -14,7 +14,7 @@ class ClauseRecord(db.Model):
     field_id = db.Column(db.Integer)
     book_id = db.Column(db.Integer)
     catalog_id = db.Column(db.Integer)
-    clause_id = db.Column(db.Integer, index=True)
+    clause_id = db.Column(db.Integer)
     operated_field = db.Column(db.String(255))
     original_value = db.Column(db.Text)
     new_value = db.Column(db.Text)
