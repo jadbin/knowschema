@@ -188,8 +188,8 @@ class GraphSyncController:
 
         return "success"
 
-    # @scheduled(cron="59 23 * * *")
-    @unique_scheduled(cron="59 23 * * *")
+    # @unique_scheduled(cron="59 23 * * *")
+    @scheduled(cron="59 23 * * *")
     def scheduled_sync_all(self):
         """
         5分钟同步一次
@@ -197,4 +197,6 @@ class GraphSyncController:
         if settings.get('development') == True:
             log.debug("Development mode. Not sync")
         else:
+            log.debug("Syncing schema to graph...")
             self.sync_all()
+            log.debug("Synced over.")
