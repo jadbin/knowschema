@@ -25,7 +25,7 @@ class GraphSyncController:
         手动备份
         """
         entities = []
-        relationes = []
+        relations = []
 
         with self.graph_sync_service.session() as session:
             """
@@ -101,7 +101,7 @@ class GraphSyncController:
                     data['relation_type'] = "is_a"
 
                     session.add_relation(**data)
-                    relationes.append(data)
+                    relations.append(data)
 
             # property
             entity_types = EntityType.query.all()
@@ -124,9 +124,11 @@ class GraphSyncController:
                         data['relation_type'] = property_type.uri
 
                         session.add_relation(**data)
-                        relationes.append(data)
+                        relations.append(data)
 
             # clause
+            argument_entities = []
+            argument_relations = []
             mappings = ClauseEntityTypeMapping.query.all()
             for mapping in mappings:
                 clause = Clause.query.filter_by(id=mapping.clause_id).first()
@@ -146,14 +148,14 @@ class GraphSyncController:
                     data['tail_local_id'] = "Clause:" + clause.uri
                     data['relation_type'] = "包含事项"
                     session.add_relation(**data)
-                    relationes.append(data)
+                    relations.append(data)
 
                     data = {}
                     data['head_local_id'] = "Concept:" + concept.uri
                     data['tail_local_id'] = "Clause:" + clause.uri
                     data['relation_type'] = "包含事项"
                     session.add_relation(**data)
-                    relationes.append(data)
+                    relations.append(data)
 
                     # 保密对象
                     data = {}
@@ -161,7 +163,7 @@ class GraphSyncController:
                     data['tail_local_id'] = "Object:" + obj.uri
                     data['relation_type'] = "保密对象"
                     session.add_relation(**data)
-                    relationes.append(data)
+                    relations.append(data)
 
                     # 保密内容
                     data = {}
@@ -169,7 +171,7 @@ class GraphSyncController:
                     data['tail_local_id'] = "Concept:" + concept.uri
                     data['relation_type'] = "保密内容"
                     session.add_relation(**data)
-                    relationes.append(data)
+                    relations.append(data)
 
                     # 事项组合
                     data = {}
@@ -177,10 +179,59 @@ class GraphSyncController:
                     data['tail_local_id'] = "Concept:" + concept.uri
                     data['relation_type'] = "事项组合"
                     session.add_relation(**data)
-                    relationes.append(data)
+                    relations.append(data)
+
+                    # 事项论元
+                    # 保密事项论元
+                    data = {}
+                    data['local_id'] = "Argument:" + mapping.object_name
+                    data['entity_type'] = "保密事项论元"
+                    data['entity_name'] = mapping.object_name
+                    data['properties'] = {
+                        "保密对象": mapping.object_uri,
+                        "事项内容": mapping.concept_uri,
+                    }
+                    argument_entities.append(data)
+
+                    data = {}
+                    data['local_id'] = "Argument:" + mapping.concept_name
+                    data['entity_type'] = "保密事项论元"
+                    data['entity_name'] = mapping.concept_name
+                    data['properties'] = {
+                        "保密对象": mapping.object_uri,
+                        "事项内容": mapping.concept_uri,
+                    }
+                    argument_entities.append(data)
+
+                    # 事项与论元关系
+                    data = {}
+                    data['head_local_id'] = "Clause:" + clause.uri
+                    data['tail_local_id'] = "Argument:" + mapping.object_name
+                    data['relation_type'] = "包含论元"
+                    argument_relations.append(data)
+
+                    data = {}
+                    data['head_local_id'] = "Argument:" + mapping.object_name
+                    data['tail_local_id'] = "Clause:" + clause.uri
+                    data['relation_type'] = "包含事项"
+                    argument_relations.append(data)
+
+                    data = {}
+                    data['head_local_id'] = "Clause:" + clause.uri
+                    data['tail_local_id'] = "Argument:" + mapping.concept_name
+                    data['relation_type'] = "包含论元"
+                    argument_relations.append(data)
+
+                    data = {}
+                    data['head_local_id'] = "Argument:" + mapping.concept_name
+                    data['tail_local_id'] = "Clause:" + clause.uri
+                    data['relation_type'] = "包含事项"
+                    argument_relations.append(data)
 
         # TODO: Backup graph
-        backup_data = [entities, relationes]
+        backup_entities = entities + argument_entities
+        backup_relations = relations + argument_relations
+        backup_data = [backup_entities, backup_relations]
         backup_file = settings.get("GRAPH_BACKUP_FILE")
 
         with open(backup_file, "w") as f:
