@@ -35,7 +35,7 @@ class AlgorithmMappingService:
     def get_algorithm_by_entity_type_uri(self, entity_type_uri):
         alg_mapping = AlgorithmMapping.query.filter_by(entity_type_uri=entity_type_uri).first()
         if alg_mapping is None:
-            log.warning(f"Not found alg mapping from entity type uri: {entity_type_uri}")
+            # log.warning(f"Not found alg mapping from entity type uri: {entity_type_uri}")
             return []
         else:
             algs = json.loads(alg_mapping.algorithm)

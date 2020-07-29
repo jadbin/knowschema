@@ -275,7 +275,22 @@ class ClauseController:
         if clause is None:
             abort(404)
         result = clause.to_dict()
-        result['mappings'] = [i.to_dict() for i in clause.clause_entity_type_mappings]
+        # result['mappings'] = [i.to_dict() for i in clause.clause_entity_type_mappings]
+        result['mappings'] = []
+        for mapping in clause.clause_entity_type_mappings:
+            mapping_data = mapping.to_dict()
+
+            object_uri = mapping_data['object_uri']
+            concept_uri = mapping_data['concept_uri']
+
+            object_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(object_uri)
+            concept_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(concept_uri)
+
+            mapping_data['object_algs'] = object_algs
+            mapping_data['concept_algs'] = concept_algs
+
+            result['mappings'].append(mapping_data)
+
         return jsonify(result)
 
     @post_route("/clause/clauses")
