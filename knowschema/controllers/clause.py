@@ -7,6 +7,7 @@ from guniflask.config import settings
 
 from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping
 from knowschema.services.clause import ClauseService
+from knowschema.services.algorithm_mapping import AlgorithmMappingService
 
 log = logging.getLogger(__name__)
 
@@ -17,8 +18,11 @@ def allowed_file(filename):
 
 @blueprint('/api')
 class ClauseController:
-    def __init__(self, clause_service: ClauseService):
+    def __init__(self,
+                 clause_service: ClauseService,
+                 algorithm_mapping_service: AlgorithmMappingService):
         self.clause_service = clause_service
+        self.algorithm_mapping_service = algorithm_mapping_service
 
     @get_route('/clause/all')
     def get_all(self):
@@ -303,13 +307,43 @@ class ClauseController:
     @get_route('/clause/mappings/all')
     def get_all_mappings(self):
         mappings = ClauseEntityTypeMapping.query.all()
-        result = [i.to_dict() for i in mappings]
+
+        result = []
+        for mapping in mappings:
+            mapping_data = mapping.to_dict()
+
+            object_uri = mapping_data['object_uri']
+            concept_uri = mapping_data['concept_uri']
+
+            object_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(object_uri)
+            concept_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(concept_uri)
+
+            mapping_data['object_algs'] = object_algs
+            mapping_data['concept_algs'] = concept_algs
+
+            result.append(mapping_data)
+
         return jsonify(result)
 
     @get_route("/clause/mappings/<clause_id>")
     def get_mapping(self, clause_id):
         mappings = ClauseEntityTypeMapping.query.filter_by(clause_id=clause_id).all()
-        result = [i.to_dict() for i in mappings]
+
+        result = []
+        for mapping in mappings:
+            mapping_data = mapping.to_dict()
+
+            object_uri = mapping_data['object_uri']
+            concept_uri = mapping_data['concept_uri']
+
+            object_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(object_uri)
+            concept_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(concept_uri)
+
+            mapping_data['object_algs'] = object_algs
+            mapping_data['concept_algs'] = concept_algs
+
+            result.append(mapping_data)
+
         return jsonify(result)
 
     @post_route("/clause/mappings")
