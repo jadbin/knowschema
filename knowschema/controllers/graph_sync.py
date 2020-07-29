@@ -1,9 +1,9 @@
 import logging
 import json
 
-from flask import abort
+from flask import abort, jsonify, request
 
-from guniflask.web import blueprint, post_route
+from guniflask.web import blueprint, post_route, get_route
 from guniflask.scheduling import scheduled
 from guniflask.config import settings
 
@@ -236,8 +236,8 @@ class GraphSyncController:
         backup_entities = entities + argument_entities
         backup_relations = relations + argument_relations
         backup_data = [backup_entities, backup_relations]
-        backup_file = settings.get("GRAPH_BACKUP_FILE")
 
+        backup_file = settings.get("GRAPH_BACKUP_FILE")
         with open(backup_file, "w") as f:
             json.dump(backup_data, f, ensure_ascii=False)
 
@@ -255,3 +255,12 @@ class GraphSyncController:
             log.debug("Syncing schema to graph...")
             self.sync_all()
             log.debug("Synced over.")
+
+    @get_route("/graph-backup")
+    def get_graph_backup(self):
+        self.sync_all()
+
+        backup_file = settings.get("GRAPH_BACKUP_FILE")
+        backup_graph = json.load(open(backup_file))
+
+        return jsonify(backup_graph)
