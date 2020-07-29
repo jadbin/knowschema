@@ -182,51 +182,55 @@ class GraphSyncController:
                     relations.append(data)
 
                     # 事项论元
-                    # 保密事项论元
-                    data = {}
-                    data['local_id'] = "Argument:" + mapping.object_name
-                    data['entity_type'] = "保密事项论元"
-                    data['entity_name'] = mapping.object_name
-                    data['properties'] = {
-                        "保密对象": mapping.object_uri,
-                        "事项内容": mapping.concept_uri,
-                    }
-                    argument_entities.append(data)
+                    if mapping.object_name is not None:
+                        # 保密事项论元
+                        data = {}
+                        data['local_id'] = "Argument:" + mapping.object_name
+                        data['entity_type'] = "保密事项论元"
+                        data['entity_name'] = mapping.object_name
+                        data['properties'] = {
+                            "保密对象": mapping.object_uri,
+                            "事项内容": mapping.concept_uri,
+                        }
+                        argument_entities.append(data)
 
-                    data = {}
-                    data['local_id'] = "Argument:" + mapping.concept_name
-                    data['entity_type'] = "保密事项论元"
-                    data['entity_name'] = mapping.concept_name
-                    data['properties'] = {
-                        "保密对象": mapping.object_uri,
-                        "事项内容": mapping.concept_uri,
-                    }
-                    argument_entities.append(data)
+                        # 事项与论元关系
+                        data = {}
+                        data['head_local_id'] = "Clause:" + clause.uri
+                        data['tail_local_id'] = "Argument:" + mapping.object_name
+                        data['relation_type'] = "包含论元"
+                        argument_relations.append(data)
 
-                    # 事项与论元关系
-                    data = {}
-                    data['head_local_id'] = "Clause:" + clause.uri
-                    data['tail_local_id'] = "Argument:" + mapping.object_name
-                    data['relation_type'] = "包含论元"
-                    argument_relations.append(data)
+                        data = {}
+                        data['head_local_id'] = "Argument:" + mapping.object_name
+                        data['tail_local_id'] = "Clause:" + clause.uri
+                        data['relation_type'] = "包含事项"
+                        argument_relations.append(data)
 
-                    data = {}
-                    data['head_local_id'] = "Argument:" + mapping.object_name
-                    data['tail_local_id'] = "Clause:" + clause.uri
-                    data['relation_type'] = "包含事项"
-                    argument_relations.append(data)
+                    if mapping.concept_name is not None:
+                        # 保密事项论元
+                        data = {}
+                        data['local_id'] = "Argument:" + mapping.concept_name
+                        data['entity_type'] = "保密事项论元"
+                        data['entity_name'] = mapping.concept_name
+                        data['properties'] = {
+                            "保密对象": mapping.object_uri,
+                            "事项内容": mapping.concept_uri,
+                        }
+                        argument_entities.append(data)
 
-                    data = {}
-                    data['head_local_id'] = "Clause:" + clause.uri
-                    data['tail_local_id'] = "Argument:" + mapping.concept_name
-                    data['relation_type'] = "包含论元"
-                    argument_relations.append(data)
+                        # 事项与论元关系
+                        data = {}
+                        data['head_local_id'] = "Clause:" + clause.uri
+                        data['tail_local_id'] = "Argument:" + mapping.concept_name
+                        data['relation_type'] = "包含论元"
+                        argument_relations.append(data)
 
-                    data = {}
-                    data['head_local_id'] = "Argument:" + mapping.concept_name
-                    data['tail_local_id'] = "Clause:" + clause.uri
-                    data['relation_type'] = "包含事项"
-                    argument_relations.append(data)
+                        data = {}
+                        data['head_local_id'] = "Argument:" + mapping.concept_name
+                        data['tail_local_id'] = "Clause:" + clause.uri
+                        data['relation_type'] = "包含事项"
+                        argument_relations.append(data)
 
         # TODO: Backup graph
         backup_entities = entities + argument_entities
