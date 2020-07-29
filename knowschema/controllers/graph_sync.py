@@ -9,7 +9,7 @@ from guniflask.config import settings
 
 from knowschema.services.graph_sync import GraphSyncService
 from knowschema.models import Clause, Catalog, Book, Field, EntityType, ClauseEntityTypeMapping
-from knowschema.utils.unique_scheduled import unique_scheduled
+from knowschema.utils.unique_scheduled import unique_scheduled, unique_process
 
 log = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class GraphSyncController:
         self.graph_sync_service = graph_sync_service
 
     @post_route('/graph-sync')
+    @unique_process
     def sync_all(self):
         """
         手动备份
