@@ -6,10 +6,11 @@ from guniflask.context import service
 from sqlalchemy import exc
 
 from knowschema.app import db
-from knowschema.models import EntityType, PropertyType, ClauseEntityTypeMapping
+from knowschema.models import EntityType, PropertyType, ClauseEntityTypeMapping, AlgorithmMapping
 from knowschema.services.operation_record import OperationRecordService
 from knowschema.services.property_type import PropertyTypeService
 from knowschema.services.clause import ClauseService
+from knowschema.services.algorithm_mapping import AlgorithmMappingService
 
 log = logging.getLogger(__name__)
 
@@ -19,10 +20,12 @@ class EntityTypeService:
     def __init__(self,
                  property_type_service: PropertyTypeService,
                  clause_service: ClauseService,
-                 operation_record_service: OperationRecordService):
+                 operation_record_service: OperationRecordService,
+                 algorithm_mapping_service: AlgorithmMappingService):
         self.property_type_service = property_type_service
         self.clause_service = clause_service
         self.operation_record_service = operation_record_service
+        self.algorithm_mapping_service = algorithm_mapping_service
 
     def create_entity_type(self, data, operator="admin"):
         entity_type = EntityType.from_dict(data, ignore='id,created_at,updated_at')
@@ -66,12 +69,14 @@ class EntityTypeService:
                 self.update_entity_type(new_parent_data, new_parent, operator)
 
         if data['uri'] != entity_type.uri:
+            # modify uri in property type
             property_types = PropertyType.query.filter_by(field_type=entity_type.uri).all()
             for property_type in property_types:
                 prop_data = property_type.to_dict()
                 prop_data['field_type'] = data['uri']
                 self.property_type_service.update_property_type(prop_data, property_type, operator)
 
+            # modify uri in clause mapping
             if entity_type.is_object == 1:
                 mappings = ClauseEntityTypeMapping.query.filter_by(object_id=entity_type.id).all()
                 for mapping in mappings:
@@ -84,6 +89,14 @@ class EntityTypeService:
                     mapping_data = mapping.to_dict()
                     mapping_data['concept_uri'] = data['uri']
                     self.clause_service.update_mapping(mapping_data, mapping, operator)
+
+            # modify uri in alg mapping
+            alg_mapping = AlgorithmMapping.query.filter_by(entity_type_id=entity_type.id).first()
+            if alg_mapping is not None:
+                alg_mapping_data = alg_mapping.to_dict()
+                alg_mapping_data['entity_type_uri'] = data['uri']
+
+                self.algorithm_mapping_service.update_algorithm_mapping(alg_mapping, alg_mapping_data)
 
             data['display_name'] = data['uri']
 
