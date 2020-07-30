@@ -365,6 +365,16 @@ class ClauseController:
     def create_mapping(self):
         data = request.json
         result = self.clause_service.create_mapping(data)
+
+        object_uri = result['object_uri']
+        concept_uri = result['concept_uri']
+
+        object_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(object_uri)
+        concept_algs = self.algorithm_mapping_service.get_child_and_parent_algorithm(concept_uri)
+
+        result['object_algs'] = object_algs
+        result['concept_algs'] = concept_algs
+
         return jsonify(result)
 
     @put_route("/clause/mappings/<mapping_id>")
