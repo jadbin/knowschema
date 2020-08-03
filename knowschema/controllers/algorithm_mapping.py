@@ -8,7 +8,7 @@ from guniflask.scheduling import scheduled
 from guniflask.config import settings
 
 from knowschema.services.algorithm_mapping import AlgorithmMappingService, AlgorithmList
-from knowschema.models import Clause, Catalog, Book, Field, EntityType, ClauseEntityTypeMapping
+from knowschema.models import EntityType, AlgorithmMapping
 from knowschema.utils.unique_scheduled import unique_scheduled, unique_process
 
 log = logging.getLogger(__name__)
@@ -53,4 +53,13 @@ class AlgorithmController:
     def get_entity_algorithm_by_uri(self):
         entity_type_uri = request.args.get("uri")
         result = self.algorithm_mapping_service.get_child_and_parent_algorithm(entity_type_uri)
+        return jsonify(result)
+
+    @get_route('/alg-mapping/all')
+    def get_all_entity_algorithm(self):
+        alg_mappings = AlgorithmMapping.query.all()
+        result = {}
+        for mapping in alg_mappings:
+            result.update({mapping.entity_type_uri: json.loads(mapping.algorithm)})
+
         return jsonify(result)
