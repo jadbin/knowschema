@@ -224,6 +224,18 @@ class ClauseController:
         results = [i.to_dict() for i in clauses]
         return jsonify(results)
 
+    @get_route("/clause/catalogs/by-book-uri")
+    def get_catalog_by_book_uri(self):
+        book_uri = request.args.get("uri")
+        book = Book.query.filter_by(uri=book_uri).first()
+        if book is not None:
+            catalogs = Catalog.query.filter_by(book_id=book.id).all()
+            result = [i.to_dict() for i in catalogs]
+
+            return jsonify(result)
+        else:
+            return "Cannot find such book.", 400
+
     @post_route("/clause/catalogs")
     def create_catalog(self):
         data = request.json
@@ -264,6 +276,18 @@ class ClauseController:
         result = clause.to_dict()
         result['mappings'] = [i.to_dict() for i in clause.clause_entity_type_mappings]
         return jsonify(result)
+
+    @get_route("/clause/clauses/by-catalog-uri")
+    def get_clause_by_catalog_uri(self):
+        catalog_uri = request.args.get("uri")
+        catalog = Catalog.query.filter_by(uri=catalog_uri).first()
+        if catalog is not None:
+            clauses = Clause.query.filter_by(catalog_id=catalog.id).all()
+            result = [i.to_dict() for i in clauses]
+
+            return jsonify(result)
+        else:
+            return "Cannot find such catalog.", 400
 
     @get_route("/clause/clauses/uri")
     def get_clause_by_uri(self):
