@@ -51,7 +51,7 @@ def test_delete_mapping():
     assert response.status_code == 200
 
 def test_checkout_mapping_uri():
-    url = root_url + "/mapping/_checkout_mapping_uri"
+    url = root_url + "/mapping/_checkout_uri"
     logger.debug(url)
     response = requests.put(url, headers=headers)
     logger.debug(response.status_code)
