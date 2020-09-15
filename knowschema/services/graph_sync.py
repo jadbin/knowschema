@@ -41,10 +41,10 @@ class GraphSyncSession:
         2. 批量插入节点
         3. 批量插入关系
         """
-        self._delete_all()
-        self._create_all_entities()
+        # self._delete_all()
+        # self._create_all_entities()
         self.entities = []
-        self._create_all_relations()
+        # self._create_all_relations()
         self.relations = []
 
     def _delete_all(self):
