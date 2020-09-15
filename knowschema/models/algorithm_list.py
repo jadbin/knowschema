@@ -1,9 +1,11 @@
 # coding=utf-8
 
+from guniflask.orm import BaseModelMixin
+
 from knowschema import db
 
 
-class AlgorithmList(db.Model):
+class AlgorithmList(BaseModelMixin, db.Model):
     __tablename__ = 'algorithm_list'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

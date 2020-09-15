@@ -1,11 +1,12 @@
 # coding=utf-8
 
+from guniflask.orm import BaseModelMixin
 from sqlalchemy import text as _text
 
 from knowschema import db
 
 
-class EntityType(db.Model):
+class EntityType(BaseModelMixin, db.Model):
     __tablename__ = 'entity_type'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -18,4 +19,5 @@ class EntityType(db.Model):
     is_object = db.Column(db.Integer, server_default=_text("'0'"))
     created_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP"), default=db.func.now())
     updated_at = db.Column(db.TIMESTAMP, server_default=_text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"), default=db.func.now(), onupdate=db.func.now())
+    algorithm_mappings = db.relationship('AlgorithmMapping', backref=db.backref('entity_type', lazy='joined'), cascade='all, delete-orphan', lazy='select')
     property_types = db.relationship('PropertyType', backref=db.backref('entity_type', lazy='joined'), cascade='all, delete-orphan', lazy='select')

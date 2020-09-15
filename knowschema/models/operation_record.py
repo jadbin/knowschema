@@ -1,11 +1,12 @@
 # coding=utf-8
 
+from guniflask.orm import BaseModelMixin
 from sqlalchemy import text as _text
 
 from knowschema import db
 
 
-class OperationRecord(db.Model):
+class OperationRecord(BaseModelMixin, db.Model):
     __tablename__ = 'operation_record'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
