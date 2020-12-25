@@ -14,8 +14,7 @@ class MainPageController:
     def __init__(self):
         pass
 
-    @get_route("/main-page/stat")
-    def get_stat(self):
+    def get_statistics(self):
         # 知识类别数量
         fields = Field.query.all()
         field_num = len(fields)
@@ -127,6 +126,11 @@ class MainPageController:
             "non_mapping_clauses_list": non_mapping_clauses_list
         }
 
+        return result
+
+    @get_route("/main-page/stat")
+    def get_stat(self):
+        result = self.get_statistics()
         return jsonify(result)
 
     @post_route("/main-page/search")
@@ -170,3 +174,36 @@ class MainPageController:
         # results['mappings'] = [i.to_dict() for i in mappings]
 
         return jsonify(results)
+
+    @get_route("/main-page/stats-for-nuwa")
+    def get_stats_for_nuwa(self):
+        result = {
+            "unhandled_items": None,
+            "fields_count": None,
+            "items_count": None,
+            "concept_count": None,
+            "regulation_count": None
+        }
+
+        stat = self.get_statistics()
+
+        result["unhandled_items"] = len(stat["non_mapping_clauses_list"])
+        result["items_count"] = stat["clause_num"]
+        result["regulation_count"] = stat["book_num"]
+        result["concept_count"] = stat["common_user_entity_type_num"]["total_entity_type_num"]
+
+        field_num = 0
+
+        field_parent = EntityType.query.filter_by(uri="领域").first()
+        field_parent_id = field_parent.id
+
+        fields = EntityType.query.filter_by(id=field_parent_id).all()
+        for field in fields:
+            field_id = field.id
+            sub_fields = EntityType.query.filter_by(id=field_id).all()
+
+            field_num += len(sub_fields)
+
+        result["fields_count"] = field_num
+
+        return jsonify(result)
