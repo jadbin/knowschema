@@ -197,10 +197,10 @@ class MainPageController:
         field_parent = EntityType.query.filter_by(uri="领域").first()
         field_parent_id = field_parent.id
 
-        fields = EntityType.query.filter_by(id=field_parent_id).all()
+        fields = EntityType.query.filter_by(father_id=field_parent_id).all()
         for field in fields:
             field_id = field.id
-            sub_fields = EntityType.query.filter_by(id=field_id).all()
+            sub_fields = EntityType.query.filter_by(father_id=field_id).all()
 
             field_num += len(sub_fields)
 
