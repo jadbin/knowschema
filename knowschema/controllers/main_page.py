@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import logging
+import time
 
 from flask import request, abort, jsonify
 from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
@@ -12,6 +13,8 @@ log = logging.getLogger(__name__)
 @blueprint('/api')
 class MainPageController:
     def __init__(self):
+        self.cache_stat = None
+        self.last_time = None
         pass
 
     def get_statistics(self):
@@ -177,33 +180,43 @@ class MainPageController:
 
     @get_route("/main-page/stats-for-nuwa")
     def get_stats_for_nuwa(self):
-        result = {
-            "unhandled_items": None,
-            "fields_count": None,
-            "items_count": None,
-            "concept_count": None,
-            "regulation_count": None
-        }
+        def stat():
+            result = {
+                "unhandled_items": None,
+                "fields_count": None,
+                "items_count": None,
+                "concept_count": None,
+                "regulation_count": None
+            }
 
-        stat = self.get_statistics()
+            stat = self.get_statistics()
 
-        result["unhandled_items"] = len(stat["non_mapping_clauses_list"])
-        result["items_count"] = stat["clause_num"]
-        result["regulation_count"] = stat["book_num"]
-        result["concept_count"] = stat["common_user_entity_type_num"]["total_entity_type_num"]
+            result["unhandled_items"] = len(stat["non_mapping_clauses_list"])
+            result["items_count"] = stat["clause_num"]
+            result["regulation_count"] = stat["book_num"]
+            result["concept_count"] = stat["common_user_entity_type_num"]["total_entity_type_num"]
 
-        field_num = 0
+            field_num = 0
 
-        field_parent = EntityType.query.filter_by(uri="领域").first()
-        field_parent_id = field_parent.id
+            field_parent = EntityType.query.filter_by(uri="领域").first()
+            field_parent_id = field_parent.id
 
-        fields = EntityType.query.filter_by(father_id=field_parent_id).all()
-        for field in fields:
-            field_id = field.id
-            sub_fields = EntityType.query.filter_by(father_id=field_id).all()
+            fields = EntityType.query.filter_by(father_id=field_parent_id).all()
+            for field in fields:
+                field_id = field.id
+                sub_fields = EntityType.query.filter_by(father_id=field_id).all()
 
-            field_num += len(sub_fields)
+                field_num += len(sub_fields)
 
-        result["fields_count"] = field_num
+            result["fields_count"] = field_num
 
-        return jsonify(result)
+            return result
+
+        current_time = time.time()
+        if self.cache_stat is None or (current_time - self.last_time) > 86400:
+            result = stat()
+            self.cache_stat = result
+            self.last_time = time.time()
+            return jsonify(result)
+        else:
+            return jsonify(self.cache_stat)
