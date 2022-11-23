@@ -6,6 +6,7 @@ from guniflask.scheduling import scheduled
 
 log = logging.getLogger(__name__)
 
+
 def unique_scheduled_v1(func):
     def wrap_func(*args, **kwargs):
         lock_file_name = func.__name__.upper() + ".LOCK"
@@ -25,6 +26,7 @@ def unique_scheduled_v1(func):
         atexit.register(unlock)
 
     return wrap_func
+
 
 def unique_scheduled_v2(cron: str = None, interval: int = None, initial_delay: int = None):
     def decorator(func):
@@ -47,7 +49,9 @@ def unique_scheduled_v2(cron: str = None, interval: int = None, initial_delay: i
             atexit.register(unlock)
 
         return wrap_func
+
     return decorator
+
 
 def unique_scheduled_v3(func):
     def wrap_func(*args, **kwargs):
@@ -56,7 +60,9 @@ def unique_scheduled_v3(func):
         with open(lock_file_name, "wb") as lock_file:
             fcntl.flock(lock_file, fcntl.LOCK_EX)
             func(*args, **kwargs)
+
     return wrap_func
+
 
 unique_scheduled = unique_scheduled_v2
 unique_process = unique_scheduled_v3

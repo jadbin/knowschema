@@ -6,6 +6,7 @@ from guniflask.web import blueprint, get_route, post_route, put_route, delete_ro
 from knowschema.models import PropertyType, EntityType
 from knowschema.services.property_type import PropertyTypeService
 
+
 @blueprint('/api')
 class PropertyTypeController:
     def __init__(self, property_type_service: PropertyTypeService):

@@ -2,12 +2,10 @@
 
 import logging
 
-from flask import request, abort, jsonify
-from sqlalchemy import or_, and_
-from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
+from flask import jsonify
+from guniflask.web import blueprint, get_route
 
-from knowschema.models import EntityType, OperationRecord
-from knowschema.app import db
+from knowschema.models import OperationRecord
 
 log = logging.getLogger(__name__)
 

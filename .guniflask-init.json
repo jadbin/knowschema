@@ -1,7 +1,0 @@
-{
-  "application_type": "microservice",
-  "authentication_type": "authorization_server",
-  "cli_version": "0.2.0",
-  "port": 8062,
-  "project_name": "knowschema"
-}

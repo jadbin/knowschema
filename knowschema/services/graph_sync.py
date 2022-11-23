@@ -4,9 +4,8 @@ import logging
 from threading import Lock
 
 import requests
-
-from guniflask.context import service
 from guniflask.config import settings
+from guniflask.context import service
 
 log = logging.getLogger(__name__)
 

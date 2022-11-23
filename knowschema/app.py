@@ -21,4 +21,3 @@ def init_app(app, settings):
     """
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
-

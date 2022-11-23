@@ -3,12 +3,13 @@
 import logging
 import time
 
-from flask import request, abort, jsonify
-from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
+from flask import request, jsonify
+from guniflask.web import blueprint, get_route, post_route
 
-from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping, EntityType, PropertyType
+from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping, EntityType
 
 log = logging.getLogger(__name__)
+
 
 @blueprint('/api')
 class MainPageController:
@@ -64,7 +65,9 @@ class MainPageController:
         common_user_entity_type_num['object_level_3_num'] = len([i for i in level_3_entity_type if i.is_object == 1])
         common_user_entity_type_num['concept_level_3_num'] = len([i for i in level_3_entity_type if i.is_object == 0])
 
-        common_user_entity_type_num['total_entity_type_num'] = common_user_entity_type_num['level_1_num'] + common_user_entity_type_num['level_2_num'] + common_user_entity_type_num['level_3_num']
+        common_user_entity_type_num['total_entity_type_num'] = common_user_entity_type_num['level_1_num'] + \
+                                                               common_user_entity_type_num['level_2_num'] + \
+                                                               common_user_entity_type_num['level_3_num']
 
         for entity_type in entity_types:
             if entity_type not in level_1_entity_type and entity_type not in level_2_entity_type and entity_type not in level_3_entity_type:

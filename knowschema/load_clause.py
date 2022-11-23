@@ -1,7 +1,7 @@
 import json
+import logging
 import os
 import re
-import logging
 
 from knowschema.app import db
 from knowschema.models import Field, Clause

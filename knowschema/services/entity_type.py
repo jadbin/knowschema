@@ -7,12 +7,13 @@ from sqlalchemy import exc
 
 from knowschema.app import db
 from knowschema.models import EntityType, PropertyType, ClauseEntityTypeMapping, AlgorithmMapping
+from knowschema.services.algorithm_mapping import AlgorithmMappingService
+from knowschema.services.clause import ClauseService
 from knowschema.services.operation_record import OperationRecordService
 from knowschema.services.property_type import PropertyTypeService
-from knowschema.services.clause import ClauseService
-from knowschema.services.algorithm_mapping import AlgorithmMappingService
 
 log = logging.getLogger(__name__)
+
 
 @service
 class EntityTypeService:

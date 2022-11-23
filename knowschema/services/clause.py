@@ -1,16 +1,17 @@
 # coding=utf-8
 
-import logging
 import csv
+import logging
 
 from guniflask.context import service
 from sqlalchemy import exc
 
+from knowschema.app import db
 from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping, EntityType
 from knowschema.services.operation_record import OperationRecordService
-from knowschema.app import db
 
 log = logging.getLogger(__name__)
+
 
 @service
 class ClauseService:
@@ -288,7 +289,7 @@ class ClauseService:
 
             target_clause_uri = item[0]
             target_mapping_object_name = item[1]
-            target_mapping_concept_name =  item[3]
+            target_mapping_concept_name = item[3]
 
             clause = Clause.query.filter_by(uri=target_clause_uri).first()
             if clause is None:

@@ -2,12 +2,12 @@ import logging
 import os
 
 from flask import request, abort, jsonify
-from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 from guniflask.config import settings
+from guniflask.web import blueprint, get_route, post_route, put_route, delete_route
 
 from knowschema.models import Field, Book, Catalog, Clause, ClauseEntityTypeMapping
-from knowschema.services.clause import ClauseService
 from knowschema.services.algorithm_mapping import AlgorithmMappingService
+from knowschema.services.clause import ClauseService
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = set(['csv'])
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+
 
 @blueprint('/api')
 class ClauseController:

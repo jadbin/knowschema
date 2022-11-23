@@ -1,15 +1,11 @@
-import logging
 import json
+import logging
 
-from flask import abort, jsonify, request
-
+from flask import jsonify, request
 from guniflask.web import blueprint, post_route, get_route
-from guniflask.scheduling import scheduled
-from guniflask.config import settings
 
-from knowschema.services.algorithm_mapping import AlgorithmMappingService, AlgorithmList
 from knowschema.models import EntityType, AlgorithmMapping
-from knowschema.utils.unique_scheduled import unique_scheduled, unique_process
+from knowschema.services.algorithm_mapping import AlgorithmMappingService, AlgorithmList
 
 log = logging.getLogger(__name__)
 

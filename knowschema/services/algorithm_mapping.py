@@ -1,16 +1,15 @@
 # coding=utf-8
 
-import logging
 import json
-import csv
+import logging
 
 from guniflask.context import service
-from sqlalchemy import exc
 
-from knowschema.models import AlgorithmMapping, AlgorithmList, EntityType
 from knowschema.app import db
+from knowschema.models import AlgorithmMapping, EntityType
 
 log = logging.getLogger(__name__)
+
 
 @service
 class AlgorithmMappingService:

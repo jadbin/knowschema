@@ -4,8 +4,7 @@ import logging
 from guniflask.context import service
 
 from knowschema.app import db
-from knowschema.models import OperationRecord, ClauseMappingRecord, ClauseRecord, EntityType, Field, Book, Catalog, \
-    Clause
+from knowschema.models import OperationRecord, ClauseMappingRecord, ClauseRecord, EntityType, Field, Book, Catalog
 
 log = logging.getLogger(__name__)
 
@@ -291,7 +290,6 @@ class OperationRecordService:
         else:
             pass
 
-
     def get_clauses_ids(self, clause_type: str, original_clause: dict):
         ids = {
             "field_id": None,
@@ -335,7 +333,6 @@ class OperationRecordService:
 
         return ids
 
-
     def update_clauses_record(self, operator, clause_type: str, new_clause: dict, original_clause: dict):
         ids = self.get_clauses_ids(clause_type, original_clause)
         self.clauses_record(operator,
@@ -346,7 +343,6 @@ class OperationRecordService:
                             ids["clause_id"],
                             new_clause,
                             original_clause)
-
 
     def create_clauses_record(self, operator, clause_type: str, new_clause: dict):
         ids = self.get_clauses_ids(clause_type, new_clause)
@@ -369,7 +365,6 @@ class OperationRecordService:
                             ids["clause_id"],
                             None,
                             original_clause)
-
 
     def update_field_record(self, operator, new_clause: dict, original_clause: dict):
         self.update_clauses_record(operator, "Field", new_clause, original_clause)

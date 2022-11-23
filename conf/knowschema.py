@@ -5,10 +5,11 @@ SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456@localhost/knowschema?char
 
 elastic_graph_base_url = 'http://localhost:6660/api'
 
+JSON_AS_ASCII = False
+
 # guniflask configuration
 guniflask = dict(
     cors=True,
-    authorization_server='https://uaa.kdsec.org',
 )
 
 UPLOAD_DIR = "knowschema/files/"
