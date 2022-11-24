@@ -6,7 +6,7 @@ import logging
 from guniflask.context import service
 
 from knowschema.app import db
-from knowschema.models import AlgorithmMapping, EntityType
+from knowschema.models import AlgorithmMapping, EntityType, AlgorithmList
 
 log = logging.getLogger(__name__)
 
